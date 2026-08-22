@@ -70,10 +70,10 @@ jobs:
           npx cap sync android
           cd android
           chmod +x gradlew
-          ./gradlew assembleRelease -Pci --no-daemon
+          ./gradlew assembleDebug -Pci --no-daemon
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
           name: Evangelho-das-Dimenuveis-Abida
-          path: android/app/build/outputs/apk/release/*.apk
+          path: android/app/build/outputs/apk/debug/*.apk
