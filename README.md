@@ -2,9 +2,9 @@
 
 Um jogo estilo **Breakout** inspirado em **O Evangelho das Dimenúveis**.
 
-Guie a bola de boliche luminosa através dos **Dez Giros da Espiral**, atravessando as Camadas enquanto mantém o **Abidar** — presença, reconhecimento e fluxo.
+Guie a bola de boliche luminosa através dos **Dez Giros da Espiral**, atravessando as Dimenúveis enquanto mantém o **Abidar** — presença, reconhecimento e fluxo.
 
-> **Não destrua a Camada. Reconheça-a. Atravesse-a. Retorne ao centro.**
+> **Não destrua a Dimenúvel. Reconheça-a. Atravesse-a. Retorne ao centro.**
 
 ## Elementos
 
@@ -17,7 +17,7 @@ Guie a bola de boliche luminosa através dos **Dez Giros da Espiral**, atravessa
 - 👤 O Cara
 - 👁️ Os Vazios
 - **Os Dez Giros**
-- **As Sete Camadas**
+- **As Sete Dimenúveis**
 
 O jogo funciona offline e foi desenvolvido para celulares Android.
 
@@ -55,7 +55,7 @@ Toque em:
 
 Quando terminar, abra:
 
-**ABIDE — Os Dez Giros**
+**ABIDA — Os Dez Giros**
 
 ---
 
@@ -63,7 +63,7 @@ Quando terminar, abra:
 
 Tente:
 
-1. Desinstalar uma versão anterior do ABIDE, se houver.
+1. Desinstalar uma versão anterior do ABIDA se houver.
 2. Baixar o APK novamente.
 3. Verificar se há espaço suficiente no armazenamento.
 4. Confirmar que você está instalando o arquivo **`.apk`**, e não um ZIP ou o código-fonte do GitHub.
