@@ -6,50 +6,74 @@ on:
   pull_request:
     branches: [ main ]
   workflow_dispatch:
-
-permissions:
-  contents: read
+    inputs:
+      sign:
+        description: 'Set to true to attempt signing with provided secrets'
+        required: false
+        default: 'false'
 
 jobs:
-  build:
+  build-android:
     runs-on: ubuntu-latest
-
+    env:
+      CI: true
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
-      - name: Setup Node.js
+      - name: Setup Node
         uses: actions/setup-node@v4
         with:
-          node-version: 20
-          cache: npm
+          node-version: '24'
 
-      - name: Install dependencies
-        run: npm ci
+      - name: Clean and install dependencies
+        run: |
+          rm -rf node_modules package-lock.json
+          npm cache clean --force || true
+          npm install --include=optional --no-audit --no-fund
 
-      - name: Build React app
+      - name: Build web assets
         run: npm run build
 
-      - name: Sync Capacitor Android project
-        run: npx cap sync android
-
-      - name: Setup Java
+      - name: Setup Java (JDK 17)
         uses: actions/setup-java@v4
         with:
-          distribution: temurin
-          java-version: '21'
-          cache: gradle
+          distribution: 'temurin'
+          java-version: '17'
 
-      - name: Make Gradle executable
-        run: chmod +x android/gradlew
+      - name: Setup Android SDK
+        uses: android-actions/setup-android@v2
+        with:
+          api-level: 33
+          build-tools: 33.0.2
 
-      - name: Build debug APK
-        working-directory: android
-        run: ./gradlew assembleDebug --no-daemon
+      - name: Restore keystore and create signing properties (manual sign only)
+        if: ${{ github.event_name == 'workflow_dispatch' && inputs.sign == 'true' }}
+        run: |
+          mkdir -p android
+          if [ -n "${{ secrets.ANDROID_KEYSTORE_BASE64 }}" ]; then
+            echo "${{ secrets.ANDROID_KEYSTORE_BASE64 }}" | base64 --decode > android/keystore.jks
+            cat > android/keystore.properties <<EOF
+            storeFile=keystore.jks
+            storePassword=${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+            keyAlias=${{ secrets.ANDROID_KEY_ALIAS }}
+            keyPassword=${{ secrets.ANDROID_KEY_PASSWORD }}
+            EOF
+          else
+            echo "ANDROID_KEYSTORE_BASE64 secret is not set; skipping signing setup."
+          fi
+
+      - name: Ensure Capacitor Android exists
+        run: npx cap add android || true
+
+      - name: Sync Capacitor and build release
+        run: |
+          npx cap sync android
+          cd android
+          chmod +x gradlew
+          ./gradlew assembleDebug -Pci --no-daemon
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
-          name: Abida-DezGiros.apk
-          path: android/app/build/outputs/apk/debug/Abida-DezGiros.apk
-          if-no-files-found: error
+          name: Evangelho-das-Dimenuveis
+          path: android/app/build/outputs/apk/debug/*.apk
