@@ -1,6 +1,6 @@
 {
-  "appId": "com.sacredrug.abides",
-  "appName": "The Sacred Rug Abides",
+  "appId": "com.dimenuvel.abida",
+  "appName": "Abida - O Jogo",
   "webDir": "dist",
   "server": {
     "androidScheme": "https"
