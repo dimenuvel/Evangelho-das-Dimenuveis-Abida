@@ -1,6 +1,6 @@
 {
-  "appId": "com.abida.osdezgiros",
-  "appName": "Abida - Os Dez Giros",
+  "appId": "com.sacredrug.abides",
+  "appName": "The Sacred Rug Abides",
   "webDir": "dist",
   "server": {
     "androidScheme": "https"

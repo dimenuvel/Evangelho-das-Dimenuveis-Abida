@@ -2,78 +2,59 @@ name: Build Android APK
 
 on:
   push:
-    branches: [ main ]
+    branches: [ main, master ]
   pull_request:
-    branches: [ main ]
+    branches: [ main, master ]
   workflow_dispatch:
-    inputs:
-      sign:
-        description: 'Set to true to attempt signing with provided secrets'
-        required: false
-        default: 'false'
 
 jobs:
-  build-android:
+  build-apk:
     runs-on: ubuntu-latest
-    env:
-      CI: true
-    steps:
-      - uses: actions/checkout@v4
 
-      - name: Setup Node
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '24'
+          node-version: 20
+          cache: 'npm'
 
-      - name: Clean and install dependencies
-        run: |
-          rm -rf node_modules package-lock.json
-          npm cache clean --force || true
-          npm install --include=optional --no-audit --no-fund
-
-      - name: Build web assets
-        run: npm run build
-
-      - name: Setup Java (JDK 17)
+      - name: Setup Java JDK
         uses: actions/setup-java@v4
         with:
-          distribution: 'temurin'
+          distribution: 'zulu'
           java-version: '17'
 
-      - name: Setup Android SDK
-        uses: android-actions/setup-android@v2
-        with:
-          api-level: 33
-          build-tools: 33.0.2
+      - name: Install Node dependencies
+        run: npm ci || npm install
 
-      - name: Restore keystore and create signing properties (manual sign only)
-        if: ${{ github.event_name == 'workflow_dispatch' && inputs.sign == 'true' }}
+      - name: Build Web Application
+        run: npm run build
+
+      - name: Initialize & Sync Capacitor Android
         run: |
-          mkdir -p android
-          if [ -n "${{ secrets.ANDROID_KEYSTORE_BASE64 }}" ]; then
-            echo "${{ secrets.ANDROID_KEYSTORE_BASE64 }}" | base64 --decode > android/keystore.jks
-            cat > android/keystore.properties <<EOF
-            storeFile=keystore.jks
-            storePassword=${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
-            keyAlias=${{ secrets.ANDROID_KEY_ALIAS }}
-            keyPassword=${{ secrets.ANDROID_KEY_PASSWORD }}
-            EOF
-          else
-            echo "ANDROID_KEYSTORE_BASE64 secret is not set; skipping signing setup."
-          fi
-
-      - name: Ensure Capacitor Android exists
-        run: npx cap add android || true
-
-      - name: Sync Capacitor and build release
-        run: |
+          npx cap add android || true
           npx cap sync android
-          cd android
-          chmod +x gradlew
-          ./gradlew assembleDebug -Pci --no-daemon
 
-      - name: Upload APK
+      - name: Setup Gradle Wrapper if missing
+        run: |
+          cd android
+          if [ ! -f "gradlew" ]; then
+            echo "Installing Gradle Wrapper..."
+            gradle wrapper --gradle-version 8.2.1
+          fi
+          chmod +x gradlew
+
+      - name: Build Debug APK with Gradle
+        run: |
+          cd android
+          ./gradlew assembleDebug --stacktrace
+
+      - name: Upload APK Artifact
         uses: actions/upload-artifact@v4
         with:
-          name: Evangelho-das-Dimenuveis
-          path: android/app/build/outputs/apk/debug/*.apk
+          name: sacred-rug-abides-debug-apk
+          path: android/app/build/outputs/apk/debug/app-debug.apk
+          retention-days: 7
