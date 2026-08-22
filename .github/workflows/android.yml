@@ -1,0 +1,60 @@
+name: Build Android APK
+
+on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+    branches: [ main, master ]
+  workflow_dispatch:
+
+jobs:
+  build-apk:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'npm'
+
+      - name: Setup Java JDK
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'zulu'
+          java-version: '17'
+
+      - name: Install Node dependencies
+        run: npm ci || npm install
+
+      - name: Build Web Application
+        run: npm run build
+
+      - name: Initialize & Sync Capacitor Android
+        run: |
+          npx cap add android || true
+          npx cap sync android
+
+      - name: Setup Gradle Wrapper if missing
+        run: |
+          cd android
+          if [ ! -f "gradlew" ]; then
+            echo "Installing Gradle Wrapper..."
+            gradle wrapper --gradle-version 8.2.1
+          fi
+          chmod +x gradlew
+
+      - name: Build Debug APK with Gradle
+        run: |
+          cd android
+          ./gradlew assembleDebug --stacktrace
+
+      - name: Upload APK Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: sacred-rug-abides-debug-apk
+          path: android/app/build/outputs/apk/debug/app-debug.apk
+          retention-days: 7
