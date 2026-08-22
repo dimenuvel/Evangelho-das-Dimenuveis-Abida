@@ -1,5 +1,8 @@
 # ABIDA — O JOGO
 
+
+https://github.com/dimenuvel/Evangelho-das-Dimenuveis-Abida/releases/tag/v1.0
+
 Um jogo estilo **Breakout** inspirado em **O Evangelho das Dimenúveis**.
 
 Guie a bola de boliche luminosa através dos **Dez Giros da Espiral**, atravessando as Dimenúveis enquanto mantém o **Abidar** — presença, reconhecimento e fluxo.
