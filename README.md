@@ -1,4 +1,4 @@
-# ABIDA — OS DEZ GIROS
+# ABIDA — O JOGO
 
 Um jogo estilo **Breakout** inspirado em **O Evangelho das Dimenúveis**.
 
@@ -55,7 +55,7 @@ Toque em:
 
 Quando terminar, abra:
 
-**ABIDA — Os Dez Giros**
+**Abida - O Jogo**
 
 ---
 
