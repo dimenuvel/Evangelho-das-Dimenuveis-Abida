@@ -23,6 +23,9 @@ jobs:
       - name: Sync Capacitor
         run: npx cap sync android
 
+      - name: Ensure gradlew is executable
+        run: chmod +x android/gradlew
+
       - name: Set up JDK
         uses: actions/setup-java@v4
         with:
