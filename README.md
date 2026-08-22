@@ -1,12 +1,12 @@
-# ABIDE — OS DEZ GIROS
+# ABIDA — OS DEZ GIROS
 
 Um jogo Breakout inspirado em **O Evangelho das Dimenúveis**.
 
-> **Não destrua a Camada. Reconheça-a. Atravesse-a. Retorne ao centro.**
+> **Não destrua a Dimenúvel. Reconheça-a. Atravesse-a. Retorne ao centro.**
 
 ## Visão Geral
 
-**ABIDE — Os Dez Giros** é um jogo de navegador em HTML5 que combina a mecânica clássica de *Breakout* com a cosmologia mística de **O Evangelho das Dimenúveis**.
+**ABIDA — Os Dez Giros** é um jogo de navegador em HTML5 que combina a mecânica clássica de *Breakout* com a cosmologia mística de **O Evangelho das Dimenúveis**.
 
 O jogador atravessa **Dez Giros da Espiral**, cada um representando um estado diferente de consciência. O objetivo não é simplesmente destruir todos os blocos, mas reconhecer os padrões de cada Camada e aprender a atravessá-los mantendo a presença.
 
@@ -24,7 +24,7 @@ O Evangelho ensina sete Camadas:
 6. **Energia**
 7. **Matéria**
 
-O praticante não foge das Camadas.
+O praticante não foge das Dimenúveis.
 
 Ele as reconhece.
 
