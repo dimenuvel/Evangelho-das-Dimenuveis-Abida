@@ -9,7 +9,7 @@ https://github.com/dimenuvel/Evangelho-das-Dimenuveis-Abida/releases/tag/v1.2
 > *"Permanece, reconhece as camadas, atravessa-as e retorna ao centro."*  
 > — *Do Evangelho das Dimenuíveis*
 
-**Abide — The Game** é um brick-breaker arcade cósmico e meditativo, construído com **React**, **HTML5 Canvas**, **Tailwind CSS** e a **Web Audio API**. Combinando mecânicas clássicas de arcade com uma mitologia espiritual, pinos de boliche cósmicos, ondas de choque a laser que atravessam camadas, power-ups elementais e a sequência harmônica de vogais (`I-E-O-U-A`), o jogo conduz os jogadores em uma jornada mística para transcender as camadas da existência e alcançar o Núcleo Dourado.
+**Abida - O Jogo** é um brick-breaker arcade cósmico e meditativo, construído com **React**, **HTML5 Canvas**, **Tailwind CSS** e a **Web Audio API**. Combinando mecânicas clássicas de arcade com uma mitologia espiritual, pinos de boliche cósmicos, ondas de choque a laser que atravessam camadas, power-ups elementais e a sequência harmônica de vogais (`I-E-O-U-A`), o jogo conduz os jogadores em uma jornada mística para transcender as camadas da existência e alcançar o Núcleo Dourado.
 
 ---
 
