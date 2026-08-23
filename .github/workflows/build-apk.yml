@@ -98,36 +98,34 @@ jobs:
           cd android
           ./gradlew assembleRelease --no-daemon --stacktrace
 
-      # Step 13: Organize and Rename Output APKs
-      - name: Organize APK Artifacts
+      # Step 13: Organize and Zip Output APK
+      - name: Organize APK Artifact
         run: |
           mkdir -p build-output
-          VERSION=$(node -p "require('./package.json').version || '1.2.0'")
-
           if [ -f "android/app/build/outputs/apk/debug/app-debug.apk" ]; then
-            cp android/app/build/outputs/apk/debug/app-debug.apk "build-output/Abide-The-Game-v${VERSION}-debug.apk"
-            echo "Created build-output/Abide-The-Game-v${VERSION}-debug.apk"
+            cp android/app/build/outputs/apk/debug/app-debug.apk "build-output/Abida-O-Jogo.apk"
+          elif [ -f "android/app/build/outputs/apk/release/app-release-unsigned.apk" ]; then
+            cp android/app/build/outputs/apk/release/app-release-unsigned.apk "build-output/Abida-O-Jogo.apk"
+          else
+            echo "No APK found!" && exit 1
           fi
+          cd build-output
+          zip Abida-O-Jogo.zip Abida-O-Jogo.apk
 
-          if [ -f "android/app/build/outputs/apk/release/app-release-unsigned.apk" ]; then
-            cp android/app/build/outputs/apk/release/app-release-unsigned.apk "build-output/Abide-The-Game-v${VERSION}-release-unsigned.apk"
-            echo "Created build-output/Abide-The-Game-v${VERSION}-release-unsigned.apk"
-          fi
-
-      # Step 14: Upload APK Artifacts to GitHub Actions
-      - name: Upload APK Artifacts
+      # Step 14: Upload Zipped APK
+      - name: Upload APK Artifact
         uses: actions/upload-artifact@v4
         with:
-          name: Abide-The-Game-APK
-          path: build-output/*.apk
+          name: Abida-O-Jogo
+          path: build-output/Abida-O-Jogo.zip
           retention-days: 14
 
-      # Step 15: Attach APKs to GitHub Release if a tag was pushed
+      # Step 15: Attach Zipped APK to GitHub Release if a tag was pushed
       - name: Release to GitHub Releases
         if: startsWith(github.ref, 'refs/tags/v')
         uses: softprops/action-gh-release@v2
         with:
-          files: build-output/*.apk
+          files: build-output/Abida-O-Jogo.zip
           draft: false
           prerelease: false
           generate_release_notes: true
