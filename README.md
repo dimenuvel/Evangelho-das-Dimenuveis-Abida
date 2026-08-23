@@ -103,9 +103,9 @@ This project is packaged with **Capacitor 8** for Android:
 - **Environment & Dependencies**:
   - **Java**: JDK 21 (Temurin)
   - **Android SDK & Build Tools**: API 34+ / 35
-  - **Node.js**: 20 LTS
+  - **Node.js**: 24 LTS
   - **Gradle Wrapper**: Automated caching via `gradle/actions/setup-gradle@v4`
-- **Output Artifacts**: Generates installable `Abide-The-Game-v1.2.0-debug.apk` and release APK artifacts automatically upon commits, PRs, version tags (`v*`), or manual `workflow_dispatch` trigger.
+- **Output Artifacts**: Generates installable `Abida-O-Jogo.apk` and release APK artifacts automatically upon commits, PRs, version tags (`v*`), or manual `workflow_dispatch` trigger.
 - **Spiral App Icon Set**: Full mipmap icon suite in `resources/android/` (`mdpi`, `hdpi`, `xhdpi`, `xxhdpi`, `xxxhdpi`) including square, round (`ic_launcher_round`), adaptive foreground (`ic_launcher_foreground`), and background layers featuring the golden sacred Fibonacci spiral.
 
 ---
