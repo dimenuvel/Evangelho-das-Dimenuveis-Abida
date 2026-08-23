@@ -12,7 +12,6 @@ interface LanguageContextType {
 }
 
 const LanguageContext = createContext<LanguageContextType | undefined>(undefined);
-
 const LANGUAGE_STORAGE_KEY = 'abide_game_language';
 
 export const LanguageProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
@@ -22,7 +21,6 @@ export const LanguageProvider: React.FC<{ children: React.ReactNode }> = ({ chil
       if (saved === 'en' || saved === 'pt') {
         return saved;
       }
-      // Auto-detect Portuguese from browser if available
       const navLang = navigator.language || '';
       if (navLang.startsWith('pt')) {
         return 'pt';

@@ -1,26 +1,33 @@
 import React, { useState } from 'react';
 import { GameStats } from '../types/game';
-import { Play, Sparkles, Music, BookOpen, Lock, Trophy, Eye, RefreshCw } from 'lucide-react';
+import { Play, Sparkles, Music, BookOpen, Lock, Trophy, Eye, RefreshCw, Quote, Compass } from 'lucide-react';
 import { useLanguage } from '../context/LanguageContext';
 import { useTheme } from '../context/ThemeContext';
 import { LanguageSelector } from './LanguageSelector';
 import { ThemeSelector } from './ThemeSelector';
 import { MAIN_PAGE_QUOTES, getRandomQuote } from '../data/quotes';
+import { soundEngine } from '../audio/soundEngine';
 
 interface MainMenuProps {
   stats: GameStats;
   onSelectTurn: (turnId: number) => void;
+  onStartEndless: () => void;
   onOpenMeditate: () => void;
   onOpenSoundLab: () => void;
   onOpenGospelLore: () => void;
+  onOpenTopScores: () => void;
+  onOpenTour: () => void;
 }
 
 export const MainMenu: React.FC<MainMenuProps> = ({
   stats,
   onSelectTurn,
+  onStartEndless,
   onOpenMeditate,
   onOpenSoundLab,
-  onOpenGospelLore
+  onOpenGospelLore,
+  onOpenTopScores,
+  onOpenTour
 }) => {
   const [selectedTab, setSelectedTab] = useState<'HOME' | 'TURNS'>('HOME');
   const { language, t, turnsConfig } = useLanguage();
@@ -32,14 +39,34 @@ export const MainMenu: React.FC<MainMenuProps> = ({
   );
   const [isRotating, setIsRotating] = useState(false);
 
-  const currentQuote = MAIN_PAGE_QUOTES[quoteIndex]
+  const currentQuoteObj = MAIN_PAGE_QUOTES[quoteIndex];
+  const currentQuote = currentQuoteObj
     ? language === 'pt'
-      ? MAIN_PAGE_QUOTES[quoteIndex].pt
-      : MAIN_PAGE_QUOTES[quoteIndex].en
+      ? currentQuoteObj.pt
+      : currentQuoteObj.en
     : t.dudeQuote;
 
-  const handleShuffleQuote = () => {
+  const currentSpeaker = currentQuoteObj
+    ? language === 'pt'
+      ? (currentQuoteObj.speakerPt || t.speakerDude)
+      : (currentQuoteObj.speakerEn || t.speakerDude)
+    : t.speakerDude;
+
+  const handleShuffleQuote = (e?: React.MouseEvent) => {
+    if (e) {
+      e.stopPropagation();
+    }
+    if (isRotating) return;
     setIsRotating(true);
+
+    try {
+      const vowels: ('I' | 'E' | 'O' | 'U' | 'A')[] = ['I', 'E', 'O', 'U', 'A'];
+      const randomVowel = vowels[quoteIndex % vowels.length];
+      soundEngine.playIEOUAVowel(randomVowel);
+    } catch {
+      // Audio fallback
+    }
+
     const { index } = getRandomQuote(language, quoteIndex);
     setQuoteIndex(index);
     setTimeout(() => setIsRotating(false), 300);
@@ -98,91 +125,150 @@ export const MainMenu: React.FC<MainMenuProps> = ({
         >
           {t.appSubtitle}
         </h2>
-
         <p className={`text-xs font-serif italic mt-1 ${isDay ? 'text-[#634e3f]' : 'text-[#d4af37]/60'}`}>
           {t.tagline}
         </p>
       </header>
 
-      {/* Center Artwork: The Cosmic Bowling Alley & The Dude */}
-      <div className="relative z-10 w-full flex flex-col items-center my-4">
+      {/* Prettier Sacred Wisdom Quote Card & Interactive Generator */}
+      <div className="relative z-10 w-full flex flex-col items-center my-3 sm:my-4">
         <div
-          className={`relative w-full max-w-sm aspect-[16/10] rounded-2xl border p-4 shadow-xl flex items-center justify-center overflow-hidden transition-all ${
+          onClick={() => handleShuffleQuote()}
+          title={language === 'pt' ? 'Clique para gerar nova citação' : 'Click to generate new quote'}
+          className={`relative w-full max-w-md rounded-2xl border p-4 sm:p-5 transition-all duration-300 cursor-pointer group hover:scale-[1.01] active:scale-[0.99] overflow-hidden ${
             isDay
-              ? 'bg-[#f0e8d8] border-[#b8860b]/30 shadow-[0_4px_30px_rgba(184,134,11,0.15)]'
-              : 'bg-[#0a0705] border-[#d4af37]/30 shadow-[0_0_40px_rgba(0,0,0,0.9)]'
+              ? 'bg-gradient-to-b from-[#fbf8f2] via-[#f5ede0] to-[#eee2cf] border-[#b8860b]/40 shadow-[0_6px_24px_rgba(184,134,11,0.15)] hover:border-[#b8860b]/80 hover:shadow-[0_8px_30px_rgba(184,134,11,0.25)]'
+              : 'bg-gradient-to-b from-[#18110b] via-[#120c08] to-[#0a0705] border-[#d4af37]/40 shadow-[0_6px_32px_rgba(0,0,0,0.8)] hover:border-[#d4af37]/80 hover:shadow-[0_8px_36px_rgba(212,175,55,0.2)]'
           }`}
         >
-          {/* Background Geometry */}
-          <div className="absolute inset-0 flex items-center justify-center opacity-10 pointer-events-none">
-            <div
-              className={`w-48 h-48 border rounded-full flex items-center justify-center rotate-45 ${
-                isDay ? 'border-[#b8860b]' : 'border-[#d4af37]'
-              }`}
-            >
-              <div
-                className={`w-36 h-36 border rounded-full ${
-                  isDay ? 'border-[#b8860b]' : 'border-[#d4af37]'
-                }`}
-              />
-            </div>
+          {/* Subtle Corner Accents */}
+          <span className={`absolute top-2 left-2 text-[10px] select-none ${isDay ? 'text-[#b8860b]/40' : 'text-[#d4af37]/40'}`}>✧</span>
+          <span className={`absolute top-2 right-2 text-[10px] select-none ${isDay ? 'text-[#b8860b]/40' : 'text-[#d4af37]/40'}`}>✧</span>
+          <span className={`absolute bottom-2 left-2 text-[10px] select-none ${isDay ? 'text-[#b8860b]/40' : 'text-[#d4af37]/40'}`}>✧</span>
+          <span className={`absolute bottom-2 right-2 text-[10px] select-none ${isDay ? 'text-[#b8860b]/40' : 'text-[#d4af37]/40'}`}>✧</span>
+
+          {/* Background Decorative Mandala Watermark */}
+          <div className="absolute inset-0 flex items-center justify-center opacity-5 pointer-events-none">
+            <div className={`w-40 h-40 border rounded-full rotate-45 ${isDay ? 'border-[#b8860b]' : 'border-[#d4af37]'}`} />
+            <div className={`absolute w-28 h-28 border rounded-full ${isDay ? 'border-[#b8860b]' : 'border-[#d4af37]'}`} />
           </div>
 
-          {/* The Dude Frame */}
-          <div
-            onClick={handleShuffleQuote}
-            title={language === 'pt' ? 'Gerar nova citação' : 'Generate new quote'}
-            className={`relative z-10 flex items-center space-x-3.5 px-4 py-3 rounded-xl border shadow-lg cursor-pointer group hover:scale-[1.01] active:scale-95 transition-all ${
-              isDay
-                ? 'bg-[#e5dbc8]/90 border-[#b8860b]/40 text-[#2c2017] hover:border-[#b8860b]/70'
-                : 'bg-[#1a140f]/90 border-[#d4af37]/40 text-[#f5deb3] hover:border-[#d4af37]/70'
+          {/* Background Subtle Watermark Quote Mark */}
+          <Quote
+            className={`absolute right-4 bottom-3 w-16 h-16 pointer-events-none opacity-[0.06] ${
+              isDay ? 'text-[#b8860b]' : 'text-[#d4af37]'
             }`}
-          >
-            <div
-              className={`w-12 h-12 rounded-full border p-0.5 flex items-center justify-center shrink-0 ${
-                isDay ? 'border-[#b8860b] bg-[#f8f4eb]' : 'border-[#d4af37] bg-[#0d0907]'
-              }`}
-            >
-              <span className="text-xl filter contrast-125 select-none">🧔</span>
-            </div>
-            <div className="text-left flex-1 min-w-0 pr-1">
-              <p
-                className={`text-xs font-serif italic leading-snug transition-opacity duration-300 ${
-                  isRotating ? 'opacity-30' : 'opacity-100'
-                } ${isDay ? 'text-[#2c2017]' : 'text-[#f5deb3]'}`}
+          />
+
+          {/* Header Bar within Card */}
+          <div className="flex items-center justify-between pb-2.5 mb-2.5 border-b border-inherit/20">
+            {/* Avatar & Title */}
+            <div className="flex items-center space-x-2.5">
+              <div
+                className={`w-7 h-7 rounded-full border flex items-center justify-center shadow-inner transition-transform group-hover:rotate-12 ${
+                  isDay
+                    ? 'border-[#b8860b] bg-[#f8f4eb] text-[#8c6508]'
+                    : 'border-[#d4af37] bg-[#0d0907] text-[#d4af37]'
+                }`}
               >
-                {currentQuote}
-              </p>
-              <div className="flex items-center justify-between mt-1">
+                <span className="text-sm select-none">🎳</span>
+              </div>
+              <div className="flex flex-col text-left">
                 <span
-                  className={`text-[9px] font-mono uppercase tracking-[0.2em] block ${
-                    isDay ? 'text-[#b8860b]' : 'text-[#d4af37]/60'
+                  className={`text-[10px] font-cinzel font-bold tracking-[0.2em] uppercase ${
+                    isDay ? 'text-[#8c6508]' : 'text-[#d4af37]'
                   }`}
                 >
-                  {t.speakerDude}
+                  {language === 'pt' ? 'Sabedoria do Tapete' : 'Rug Wisdom'}
                 </span>
-                <span className="flex items-center space-x-1 text-[9px] font-mono opacity-50 group-hover:opacity-100 transition-opacity">
-                  <RefreshCw
-                    className={`w-2.5 h-2.5 ${isRotating ? 'animate-spin' : ''} ${
-                      isDay ? 'text-[#8c6508]' : 'text-[#d4af37]'
-                    }`}
-                  />
+                <span
+                  className={`text-[8px] font-mono tracking-widest uppercase ${
+                    isDay ? 'text-[#634e3f]/70' : 'text-[#f5deb3]/50'
+                  }`}
+                >
+                  {language === 'pt' ? 'Versículo' : 'Verse'} {quoteIndex + 1}/{MAIN_PAGE_QUOTES.length}
                 </span>
               </div>
             </div>
+
+            {/* Quote Generator Action Button */}
+            <button
+              onClick={handleShuffleQuote}
+              type="button"
+              className={`flex items-center space-x-1.5 px-2.5 py-1 rounded-full border text-[10px] font-mono uppercase tracking-wider transition-all duration-200 ${
+                isDay
+                  ? 'bg-[#ede4d4] hover:bg-[#b8860b] text-[#2c2017] hover:text-[#f8f4eb] border-[#b8860b]/40 shadow-sm'
+                  : 'bg-[#1a140f] hover:bg-[#d4af37] text-[#d4af37] hover:text-[#0d0907] border-[#d4af37]/40 shadow-sm'
+              }`}
+              title={language === 'pt' ? 'Gerar nova citação' : 'Generate new quote'}
+            >
+              <RefreshCw
+                className={`w-3 h-3 ${isRotating ? 'animate-spin' : 'group-hover:rotate-45'} transition-transform`}
+              />
+              <span className="hidden xs:inline sm:inline">
+                {language === 'pt' ? 'Gerar' : 'Generate'}
+              </span>
+            </button>
+          </div>
+
+          {/* Quote Body with Graceful Animation */}
+          <div className="py-2 px-1 sm:px-3 text-center min-h-[64px] flex flex-col items-center justify-center">
+            <p
+              className={`text-xs sm:text-sm font-serif italic leading-relaxed transition-all duration-300 ${
+                isRotating ? 'opacity-20 scale-98 translate-y-0.5' : 'opacity-100 scale-100 translate-y-0'
+              } ${isDay ? 'text-[#2c2017]' : 'text-[#f5deb3]'}`}
+            >
+              {currentQuote}
+            </p>
+          </div>
+
+          {/* Card Footer: Speaker Attribution & Interactive Cue */}
+          <div className="flex items-center justify-between pt-2 mt-1 border-t border-inherit/15 text-[9px] font-mono">
+            <span
+              className={`uppercase tracking-[0.15em] flex items-center space-x-1 ${
+                isDay ? 'text-[#8c6508]' : 'text-[#d4af37]/80'
+              }`}
+            >
+              <span>—</span>
+              <span>{currentSpeaker}</span>
+            </span>
+            <span
+              className={`tracking-wider italic transition-opacity opacity-50 group-hover:opacity-100 flex items-center space-x-1 ${
+                isDay ? 'text-[#634e3f]' : 'text-[#f5deb3]/60'
+              }`}
+            >
+              <Sparkles className="w-2.5 h-2.5" />
+              <span>{language === 'pt' ? 'Toque para alternar' : 'Tap to shuffle'}</span>
+            </span>
           </div>
         </div>
 
-        {/* High Score Badge */}
-        <div
-          className={`flex items-center space-x-2 mt-3 text-xs font-mono px-4 py-1.5 rounded border ${
-            isDay
-              ? 'bg-[#ede4d4] text-[#2c2017] border-[#b8860b]/30'
-              : 'bg-[#1a140f] text-[#d4af37] border-[#d4af37]/30'
-          }`}
-        >
-          <Trophy className={`w-3.5 h-3.5 ${isDay ? 'text-[#b8860b]' : 'text-[#d4af37]'}`} />
-          <span className="tracking-widest">{t.bestScore}: {stats.highScore.toString().padStart(6, '0')}</span>
+        {/* High Score Badge & Top 10 Button */}
+        <div className="flex items-center space-x-2 mt-2.5">
+          <div
+            className={`flex items-center space-x-2 text-xs font-mono px-3.5 py-1.5 rounded-full border shadow-sm ${
+              isDay
+                ? 'bg-[#ede4d4] text-[#2c2017] border-[#b8860b]/30'
+                : 'bg-[#1a140f] text-[#d4af37] border-[#d4af37]/30'
+            }`}
+          >
+            <Trophy className={`w-3.5 h-3.5 ${isDay ? 'text-[#b8860b]' : 'text-[#d4af37]'}`} />
+            <span className="tracking-widest">{t.bestScore}: {stats.highScore.toString().padStart(6, '0')}</span>
+          </div>
+
+          <button
+            onClick={onOpenTopScores}
+            type="button"
+            className={`flex items-center space-x-1.5 text-xs font-cinzel font-bold tracking-wider px-3 py-1.5 rounded-full border shadow-sm transition-all hover:scale-105 active:scale-95 cursor-pointer ${
+              isDay
+                ? 'bg-[#ede4d4] hover:bg-[#b8860b] text-[#8c6508] hover:text-[#f8f4eb] border-[#b8860b]/40 shadow-[0_0_10px_rgba(184,134,11,0.15)]'
+                : 'bg-[#1a140f] hover:bg-[#d4af37] text-[#d4af37] hover:text-[#0d0907] border-[#d4af37]/40 shadow-[0_0_10px_rgba(212,175,55,0.2)]'
+            }`}
+            title={t.topScores}
+          >
+            <Sparkles className="w-3 h-3 text-[#d4af37]" />
+            <span>{t.topScoresBtn}</span>
+          </button>
         </div>
       </div>
 
@@ -190,34 +276,73 @@ export const MainMenu: React.FC<MainMenuProps> = ({
       <div className="relative z-10 w-full space-y-4">
         {selectedTab === 'HOME' ? (
           <div className="flex flex-col space-y-3">
-            <button
-              onClick={() => onSelectTurn(stats.unlockedTurn || 1)}
-              className={`w-full py-3.5 font-cinzel font-bold text-sm tracking-[0.25em] uppercase rounded-xl hover:scale-[1.02] active:scale-95 transition-all flex items-center justify-center space-x-2 shadow-lg ${
-                isDay
-                  ? 'bg-gradient-to-r from-[#b8860b] via-[#e5c158] to-[#b8860b] text-[#1f160e] shadow-[0_0_20px_rgba(184,134,11,0.3)]'
-                  : 'bg-gradient-to-r from-[#d4af37] via-[#f5deb3] to-[#d4af37] text-[#0d0907] shadow-[0_0_20px_rgba(212,175,55,0.4)]'
-              }`}
-            >
-              <Play className="w-4 h-4 fill-current" />
-              <span>{t.playTurn} {stats.unlockedTurn || 1}</span>
-            </button>
+            {/* 2 Primary Game Modes: 10 Turns & Infinite Mode side-by-side */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+              {/* Mode 1: 10 Turns Story Mode (Golden Background) */}
+              <button
+                onClick={() => onSelectTurn(stats.unlockedTurn || 1)}
+                className={`relative group p-3.5 font-cinzel font-bold text-xs tracking-[0.2em] uppercase rounded-2xl hover:scale-[1.02] active:scale-95 transition-all flex flex-col items-center justify-center text-center shadow-lg border ${
+                  isDay
+                    ? 'bg-gradient-to-r from-[#b8860b] via-[#e5c158] to-[#b8860b] text-[#1f160e] border-[#b8860b] shadow-[0_0_20px_rgba(184,134,11,0.35)]'
+                    : 'bg-gradient-to-r from-[#d4af37] via-[#f5deb3] to-[#d4af37] text-[#0d0907] border-[#d4af37] shadow-[0_0_20px_rgba(212,175,55,0.45)]'
+                }`}
+              >
+                <div className="flex items-center space-x-2 mb-1">
+                  <Play className="w-4 h-4 fill-current" />
+                  <span className="text-sm">{t.tenTurnsBtn}</span>
+                </div>
+                <span className="text-[9px] font-serif italic normal-case tracking-normal opacity-90">
+                  {t.playTurn} {stats.unlockedTurn || 1} • {language === 'pt' ? 'História' : 'Campaign'}
+                </span>
+              </button>
 
+              {/* Mode 2: Endless Random Infinite Mode */}
+              <button
+                onClick={onStartEndless}
+                className={`relative group p-3.5 font-cinzel font-bold text-xs tracking-[0.2em] uppercase rounded-2xl hover:scale-[1.02] active:scale-95 transition-all flex flex-col items-center justify-center text-center shadow-lg border ${
+                  isDay
+                    ? 'bg-gradient-to-br from-[#f8f4eb] via-[#ede4d4] to-[#e6d7c3] border-[#b8860b]/60 text-[#1f160e] shadow-[0_0_15px_rgba(184,134,11,0.2)] hover:border-[#b8860b]'
+                    : 'bg-gradient-to-br from-[#1a140f] via-[#120c08] to-[#0a0705] border-[#d4af37]/60 text-[#d4af37] shadow-[0_0_15px_rgba(212,175,55,0.25)] hover:border-[#d4af37]'
+                }`}
+              >
+                <div className="flex items-center space-x-1.5 mb-1">
+                  <span className="text-base font-bold select-none leading-none">∞</span>
+                  <span className="text-sm">{t.endlessBtn}</span>
+                </div>
+                <span className={`text-[9px] font-serif italic normal-case tracking-normal ${isDay ? 'text-[#634e3f]' : 'text-[#f5deb3]/70'}`}>
+                  {language === 'pt' ? 'Sem Fim • Modos Aleatórios' : 'Endless • Score Attack'}
+                </span>
+              </button>
+            </div>
+
+            {/* Select Turn Browser Button */}
             <button
               onClick={() => setSelectedTab('TURNS')}
-              className={`w-full py-3 border font-serif font-medium text-xs tracking-[0.2em] uppercase rounded-xl transition-all flex items-center justify-center space-x-2 ${
+              className={`w-full py-2.5 border font-serif font-medium text-xs tracking-[0.2em] uppercase rounded-xl transition-all flex items-center justify-center space-x-2 ${
                 isDay
                   ? 'bg-[#ede4d4] border-[#b8860b]/40 text-[#2c2017] hover:bg-[#b8860b]/15'
                   : 'bg-[#1a140f] border-[#d4af37]/40 text-[#d4af37] hover:bg-[#d4af37]/10'
               }`}
             >
-              <Eye className={`w-4 h-4 ${isDay ? 'text-[#b8860b]' : 'text-[#d4af37]'}`} />
+              <Eye className={`w-3.5 h-3.5 ${isDay ? 'text-[#b8860b]' : 'text-[#d4af37]'}`} />
               <span>{t.selectTurn}</span>
             </button>
 
-            <div className="grid grid-cols-3 gap-2 pt-1">
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 pt-1">
+              <button
+                onClick={onOpenTour}
+                className={`flex flex-col items-center justify-center p-2.5 sm:p-3 border rounded-xl transition-all text-center cursor-pointer ${
+                  isDay
+                    ? 'bg-[#ede4d4]/90 border-[#b8860b]/30 text-[#2c2017] hover:bg-[#b8860b]/15'
+                    : 'bg-[#1a140f]/80 border-[#d4af37]/30 text-[#d4af37] hover:bg-[#d4af37]/10'
+                }`}
+              >
+                <Compass className={`w-4 h-4 mb-1 ${isDay ? 'text-[#b8860b]' : 'text-[#d4af37]'}`} />
+                <span className="text-[10px] font-serif tracking-wider uppercase">{t.tourMenuBtn}</span>
+              </button>
               <button
                 onClick={onOpenMeditate}
-                className={`flex flex-col items-center justify-center p-3 border rounded-xl transition-all text-center ${
+                className={`flex flex-col items-center justify-center p-2.5 sm:p-3 border rounded-xl transition-all text-center cursor-pointer ${
                   isDay
                     ? 'bg-[#ede4d4]/90 border-[#b8860b]/30 text-[#2c2017] hover:bg-[#b8860b]/15'
                     : 'bg-[#1a140f]/80 border-[#d4af37]/30 text-[#d4af37] hover:bg-[#d4af37]/10'
@@ -226,10 +351,9 @@ export const MainMenu: React.FC<MainMenuProps> = ({
                 <Sparkles className={`w-4 h-4 mb-1 ${isDay ? 'text-[#b8860b]' : 'text-[#d4af37]'}`} />
                 <span className="text-[10px] font-serif tracking-wider uppercase">{t.meditate}</span>
               </button>
-
               <button
                 onClick={onOpenSoundLab}
-                className={`flex flex-col items-center justify-center p-3 border rounded-xl transition-all text-center ${
+                className={`flex flex-col items-center justify-center p-2.5 sm:p-3 border rounded-xl transition-all text-center cursor-pointer ${
                   isDay
                     ? 'bg-[#ede4d4]/90 border-[#b8860b]/30 text-[#2c2017] hover:bg-[#b8860b]/15'
                     : 'bg-[#1a140f]/80 border-[#d4af37]/30 text-[#d4af37] hover:bg-[#d4af37]/10'
@@ -238,10 +362,9 @@ export const MainMenu: React.FC<MainMenuProps> = ({
                 <Music className={`w-4 h-4 mb-1 ${isDay ? 'text-[#b8860b]' : 'text-[#d4af37]'}`} />
                 <span className="text-[10px] font-serif tracking-wider uppercase">{t.soundLab}</span>
               </button>
-
               <button
                 onClick={onOpenGospelLore}
-                className={`flex flex-col items-center justify-center p-3 border rounded-xl transition-all text-center ${
+                className={`flex flex-col items-center justify-center p-2.5 sm:p-3 border rounded-xl transition-all text-center cursor-pointer ${
                   isDay
                     ? 'bg-[#ede4d4]/90 border-[#b8860b]/30 text-[#2c2017] hover:bg-[#b8860b]/15'
                     : 'bg-[#1a140f]/80 border-[#d4af37]/30 text-[#d4af37] hover:bg-[#d4af37]/10'
@@ -277,7 +400,6 @@ export const MainMenu: React.FC<MainMenuProps> = ({
               {Object.values(turnsConfig).map(turn => {
                 const isUnlocked = turn.id <= (stats.unlockedTurn || 1);
                 const isCompleted = stats.turnsCompleted?.includes(turn.id);
-
                 return (
                   <button
                     key={turn.id}
@@ -307,7 +429,6 @@ export const MainMenu: React.FC<MainMenuProps> = ({
                         <Sparkles className={`w-3 h-3 ${isDay ? 'text-[#b8860b]' : 'text-[#d4af37]'}`} />
                       ) : null}
                     </div>
-
                     <span
                       className={`text-xs font-cinzel font-semibold mt-1 truncate ${
                         isDay ? 'text-[#2c2017]' : 'text-[#d4af37]'
@@ -315,7 +436,6 @@ export const MainMenu: React.FC<MainMenuProps> = ({
                     >
                       {turn.title}
                     </span>
-
                     <span
                       className={`text-[9px] font-mono mt-1 uppercase ${
                         isDay ? 'text-[#8c6508]' : 'text-[#d4af37]/60'

@@ -4,14 +4,14 @@ import { Language } from '../i18n/translations';
 export const TURNS_CONFIG_EN: Record<number, TurnConfig> = {
   1: {
     id: 1,
-    title: 'THE MIRROR OF THE MIND',
+    title: 'THE MIRROR OF SILENCE',
     subtitle: 'TURN I',
     layer: 'SILENCE',
     description: 'In the stillness before movement, awareness rests. Observe the reflection without attachment.',
     themeColor: '#8b5cf6',
     accentColor: '#fbbf24',
     ballSpeed: 4.8,
-    bgSymbol: '🪞',
+    bgSymbol: '◎',
     quote: 'Do not destroy the Dimenuous. Recognize it.'
   },
   2: {
@@ -23,20 +23,20 @@ export const TURNS_CONFIG_EN: Record<number, TurnConfig> = {
     themeColor: '#3b82f6',
     accentColor: '#38bdf8',
     ballSpeed: 5.2,
-    bgSymbol: '👁️',
+    bgSymbol: '👁',
     quote: 'The Eye reveals what was always there.'
   },
   3: {
     id: 3,
-    title: 'THE FLOW OF ENERGY',
+    title: 'THE FLOW OF MIND',
     subtitle: 'TURN III',
-    layer: 'ENERGY',
-    description: 'All structures vibrate and pulse. Rhythm guides the trajectory through shifting motion.',
+    layer: 'MIND',
+    description: 'All structures vibrate and pulse in consciousness. The mind observes the rhythm and lets it roll.',
     themeColor: '#10b981',
     accentColor: '#a7f3d0',
     ballSpeed: 5.6,
-    bgSymbol: '🌀',
-    quote: 'Just let it roll, man.'
+    bgSymbol: '⚡',
+    quote: 'Observe the mind. Just let it roll, man.'
   },
   4: {
     id: 4,
@@ -47,7 +47,7 @@ export const TURNS_CONFIG_EN: Record<number, TurnConfig> = {
     themeColor: '#ec4899',
     accentColor: '#f472b6',
     ballSpeed: 5.8,
-    bgSymbol: '💖',
+    bgSymbol: '⚜',
     quote: 'Touch one, move many.'
   },
   5: {
@@ -59,32 +59,32 @@ export const TURNS_CONFIG_EN: Record<number, TurnConfig> = {
     themeColor: '#f97316',
     accentColor: '#fdba74',
     ballSpeed: 6.0,
-    bgSymbol: '⚡',
+    bgSymbol: '⚔',
     quote: 'Choose your strike with steady mind.'
   },
   6: {
     id: 6,
-    title: 'THE ELEMENTAL FIELD',
+    title: 'THE ENERGY OF THE ELEMENTS',
     subtitle: 'TURN VI',
-    layer: 'MATTER',
-    description: 'Fire, Air, Water, Earth — four forces shape the plane. Harness them in balance.',
+    layer: 'ENERGY',
+    description: 'Fire, Air, Water, Earth — dynamic currents of energy shape the plane. Harness them in balance.',
     themeColor: '#eab308',
     accentColor: '#ef4444',
     ballSpeed: 6.2,
-    bgSymbol: '🔥',
-    quote: 'The four elements sustain the Rug.'
+    bgSymbol: '✧',
+    quote: 'Energy sustains the sacred elements.'
   },
   7: {
     id: 7,
-    title: 'THE VOID',
+    title: 'THE DENSITY OF MATTER',
     subtitle: 'TURN VII',
-    layer: 'VOID',
-    description: 'Illusion tempts the hurried mind. Recognize false targets and reversed currents.',
+    layer: 'MATTER',
+    description: 'Physical form and structural density. Recognize how matter crystallizes consciousness.',
     themeColor: '#a855f7',
     accentColor: '#c084fc',
     ballSpeed: 6.4,
-    bgSymbol: '🕳️',
-    quote: 'Not everything that appears is real.'
+    bgSymbol: '✦',
+    quote: 'Matter takes shape when awareness condenses.'
   },
   8: {
     id: 8,
@@ -95,7 +95,7 @@ export const TURNS_CONFIG_EN: Record<number, TurnConfig> = {
     themeColor: '#06b6d4',
     accentColor: '#67e8f9',
     ballSpeed: 6.6,
-    bgSymbol: '🔄',
+    bgSymbol: '♾',
     quote: 'Sometimes you bowl. Sometimes the ball bowls you.'
   },
   9: {
@@ -107,7 +107,7 @@ export const TURNS_CONFIG_EN: Record<number, TurnConfig> = {
     themeColor: '#14b8a6',
     accentColor: '#5eead4',
     ballSpeed: 6.8,
-    bgSymbol: '🚪',
+    bgSymbol: '☿',
     quote: 'Shift the angle, transform the dimenuous.'
   },
   10: {
@@ -119,7 +119,7 @@ export const TURNS_CONFIG_EN: Record<number, TurnConfig> = {
     themeColor: '#f59e0b',
     accentColor: '#fbbf24',
     ballSpeed: 5.0,
-    bgSymbol: '🌌',
+    bgSymbol: '☉',
     quote: 'You were here the whole time.'
   }
 };
@@ -127,14 +127,14 @@ export const TURNS_CONFIG_EN: Record<number, TurnConfig> = {
 export const TURNS_CONFIG_PT: Record<number, TurnConfig> = {
   1: {
     id: 1,
-    title: 'O ESPELHO DA MENTE',
+    title: 'O ESPELHO DO SILÊNCIO',
     subtitle: 'GIRO I',
     layer: 'SILÊNCIO',
     description: 'Na quietude antes do movimento, a consciência repousa. Observe o reflexo sem apegos.',
     themeColor: '#8b5cf6',
     accentColor: '#fbbf24',
     ballSpeed: 4.8,
-    bgSymbol: '🪞',
+    bgSymbol: '◎',
     quote: 'Não destrua a Dimenúvel. Reconheça-a.'
   },
   2: {
@@ -146,20 +146,20 @@ export const TURNS_CONFIG_PT: Record<number, TurnConfig> = {
     themeColor: '#3b82f6',
     accentColor: '#38bdf8',
     ballSpeed: 5.2,
-    bgSymbol: '👁️',
+    bgSymbol: '👁',
     quote: 'O Olho revela o que sempre esteve lá.'
   },
   3: {
     id: 3,
-    title: 'O FLUXO DE ENERGIA',
+    title: 'A MENTE',
     subtitle: 'GIRO III',
-    layer: 'ENERGIA',
-    description: 'Todas as estruturas vibram e pulsacionam. O ritmo guia a trajetória através do movimento.',
+    layer: 'MENTE',
+    description: 'Todas as estruturas vibram e pulsam na consciência. A mente observa e alinha-se ao ritmo sem resistência.',
     themeColor: '#10b981',
     accentColor: '#a7f3d0',
     ballSpeed: 5.6,
-    bgSymbol: '🌀',
-    quote: 'Apenas deixe rolar, cara.'
+    bgSymbol: '⚡',
+    quote: 'Observe a mente. Apenas deixe rolar, cara.'
   },
   4: {
     id: 4,
@@ -170,7 +170,7 @@ export const TURNS_CONFIG_PT: Record<number, TurnConfig> = {
     themeColor: '#ec4899',
     accentColor: '#f472b6',
     ballSpeed: 5.8,
-    bgSymbol: '💖',
+    bgSymbol: '⚜',
     quote: 'Toque em um, mova muitos.'
   },
   5: {
@@ -182,32 +182,32 @@ export const TURNS_CONFIG_PT: Record<number, TurnConfig> = {
     themeColor: '#f97316',
     accentColor: '#fdba74',
     ballSpeed: 6.0,
-    bgSymbol: '⚡',
+    bgSymbol: '⚔',
     quote: 'Escolha seu golpe com a mente firme.'
   },
   6: {
     id: 6,
-    title: 'O CAMPO ELEMENTAL',
+    title: 'A ENERGIA DOS ELEMENTOS',
     subtitle: 'GIRO VI',
-    layer: 'MATÉRIA',
-    description: 'Fogo, Ar, Água, Terra — quatro forças moldam o plano. Domine-as em equilíbrio.',
+    layer: 'ENERGIA',
+    description: 'Fogo, Ar, Água, Terra — correntes de energia dinâmica moldam o plano. Domine-as em equilíbrio.',
     themeColor: '#eab308',
     accentColor: '#ef4444',
     ballSpeed: 6.2,
-    bgSymbol: '🔥',
-    quote: 'Os quatro elementos sustentam o Tapete.'
+    bgSymbol: '✧',
+    quote: 'A energia sustenta os elementos sagrados.'
   },
   7: {
     id: 7,
-    title: 'O VAZIO',
+    title: 'A DENSIDADE DA MATÉRIA',
     subtitle: 'GIRO VII',
-    layer: 'VAZIO',
-    description: 'A ilusão tenta a mente apressada. Reconheça alvos falsos e correntes invertidas.',
+    layer: 'MATÉRIA',
+    description: 'Forma física e densidade estrutural. Reconheça como a matéria cristaliza a consciência no plano.',
     themeColor: '#a855f7',
     accentColor: '#c084fc',
     ballSpeed: 6.4,
-    bgSymbol: '🕳️',
-    quote: 'Nem tudo o que aparece é real.'
+    bgSymbol: '✦',
+    quote: 'A matéria ganha forma quando a consciência se condensa.'
   },
   8: {
     id: 8,
@@ -218,7 +218,7 @@ export const TURNS_CONFIG_PT: Record<number, TurnConfig> = {
     themeColor: '#06b6d4',
     accentColor: '#67e8f9',
     ballSpeed: 6.6,
-    bgSymbol: '🔄',
+    bgSymbol: '♾',
     quote: 'Às vezes você joga boliche. Às vezes a bola joga você.'
   },
   9: {
@@ -230,7 +230,7 @@ export const TURNS_CONFIG_PT: Record<number, TurnConfig> = {
     themeColor: '#14b8a6',
     accentColor: '#5eead4',
     ballSpeed: 6.8,
-    bgSymbol: '🚪',
+    bgSymbol: '☿',
     quote: 'Mude o ângulo, transforme a dimenúvel.'
   },
   10: {
@@ -242,7 +242,7 @@ export const TURNS_CONFIG_PT: Record<number, TurnConfig> = {
     themeColor: '#f59e0b',
     accentColor: '#fbbf24',
     ballSpeed: 5.0,
-    bgSymbol: '🌌',
+    bgSymbol: '☉',
     quote: 'Você esteve aqui todo esse tempo.'
   }
 };
@@ -319,7 +319,7 @@ export const CUTSCENES_PT: Record<number, Cutscene> = {
     turnId: 3,
     lines: [
       { speaker: 'DISCIPLE', text: 'Os blocos estão pulsando e se movendo! A realidade está desmoronando?' },
-      { speaker: 'THE DUDE', text: 'Que nada. É só a energia fluindo pelas Dimenúveis. Tudo se move, cara.' },
+      { speaker: 'THE DUDE', text: 'Que nada. É a energia fluindo pelas Dimenúveis. Tudo se move, cara.' },
       { speaker: 'DISCIPLE', text: 'Eu deveria tentar pará-los?' },
       { speaker: 'THE DUDE', text: 'Não lute contra a Espiral. Tome seu White Russian e mova-se com ela.' }
     ]
@@ -347,7 +347,7 @@ export const CUTSCENES_PT: Record<number, Cutscene> = {
     lines: [
       { speaker: 'DISCIPLE', text: 'Estamos chegando ao Giro X! O que acontece quando finalmente escaparmos das dimenúveis?' },
       { speaker: 'THE DUDE', text: 'Escapar? Quem disse algo sobre escapar?' },
-      { speaker: 'DISCIPLE', text: 'Não é esse o objetivo do Evangelho?' },
+      { speaker: 'DISCIPLE', text: 'Não é esse o objetivo do Evangelho das Dimenúveis?' },
       { speaker: 'THE DUDE', text: 'Heh. Você verá no Giro X. Apenas mantenha a bola rolando.' }
     ]
   }

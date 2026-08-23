@@ -1,6 +1,6 @@
 import React from 'react';
 import { TurnConfig } from '../types/game';
-import { Volume2, VolumeX, Pause, Play, Smartphone } from 'lucide-react';
+import { Volume2, VolumeX, Pause, Play } from 'lucide-react';
 import { useLanguage } from '../context/LanguageContext';
 import { useTheme } from '../context/ThemeContext';
 import { LanguageSelector } from './LanguageSelector';
@@ -13,10 +13,12 @@ interface HUDProps {
   isAbideMode: boolean;
   isMuted: boolean;
   isPaused: boolean;
-  vibrationEnabled: boolean;
+  gameMode?: 'TURNS' | 'ENDLESS';
+  wave?: number;
+  vibrationEnabled?: boolean;
   onToggleMute: () => void;
   onTogglePause: () => void;
-  onToggleVibration: () => void;
+  onToggleVibration?: () => void;
 }
 
 export const HUD: React.FC<HUDProps> = ({
@@ -27,16 +29,16 @@ export const HUD: React.FC<HUDProps> = ({
   isAbideMode,
   isMuted,
   isPaused,
-  vibrationEnabled,
+  gameMode = 'TURNS',
+  wave = 1,
   onToggleMute,
-  onTogglePause,
-  onToggleVibration
+  onTogglePause
 }) => {
   const { t } = useLanguage();
   const { isDay } = useTheme();
 
   return (
-    <div className="w-full max-w-[480px] flex flex-col space-y-2 mb-2 px-2 select-none">
+    <div className="w-full max-w-[500px] flex flex-col space-y-1.5 mb-1 px-1 select-none">
       {/* Top HUD Bar */}
       <div
         className={`flex items-center justify-between backdrop-blur-md px-4 py-2.5 rounded-2xl border transition-all ${
@@ -48,11 +50,18 @@ export const HUD: React.FC<HUDProps> = ({
         {/* Left: Layer / Turn title */}
         <div className="flex flex-col min-w-0 max-w-[180px] justify-center">
           <span
-            className={`text-[9px] sm:text-[10px] font-serif uppercase tracking-[0.2em] leading-tight ${
+            className={`text-[9px] sm:text-[10px] font-serif uppercase tracking-[0.2em] leading-tight flex items-center space-x-1 ${
               isDay ? 'text-[#8c6508]' : 'text-[#d4af37]/70'
             }`}
           >
-            {turnConfig.subtitle} — {t.layerLabel} {turnConfig.layer}
+            {gameMode === 'ENDLESS' ? (
+              <>
+                <span className="font-bold text-xs">∞</span>
+                <span>{t.endlessTitle} • {t.wave} {wave}</span>
+              </>
+            ) : (
+              <span>{turnConfig.subtitle} — {t.layerLabel} {turnConfig.layer}</span>
+            )}
           </span>
           <span
             className={`text-xs sm:text-sm font-cinzel font-semibold tracking-wide leading-snug whitespace-normal break-words ${
@@ -78,7 +87,6 @@ export const HUD: React.FC<HUDProps> = ({
           >
             {t.abideMeter}
           </span>
-
           <div
             className={`w-full max-w-[120px] h-2 border mt-1 overflow-hidden rounded-full p-[1px] ${
               isDay ? 'bg-[#ede4d4] border-[#b8860b]/30' : 'bg-[#1a140f] border-[#d4af37]/30'
@@ -143,26 +151,8 @@ export const HUD: React.FC<HUDProps> = ({
             {t.rugAbides}
           </span>
         </div>
-
         <div className="flex items-center space-x-1.5">
           <LanguageSelector compact />
-
-          <button
-            onClick={onToggleVibration}
-            className={`p-1.5 rounded-lg border transition-all ${
-              vibrationEnabled
-                ? isDay
-                  ? 'bg-[#b8860b]/15 border-[#b8860b]/50 text-[#b8860b]'
-                  : 'bg-[#d4af37]/15 border-[#d4af37]/50 text-[#d4af37]'
-                : isDay
-                ? 'bg-[#ede4d4] border-[#b8860b]/20 text-[#634e3f]/50'
-                : 'bg-[#1a140f] border-[#d4af37]/10 text-[#d4af37]/40'
-            }`}
-            title="Toggle Vibration"
-          >
-            <Smartphone className="w-3.5 h-3.5" />
-          </button>
-
           <button
             onClick={onToggleMute}
             className={`p-1.5 rounded-lg border transition-all ${
@@ -178,7 +168,6 @@ export const HUD: React.FC<HUDProps> = ({
           >
             {!isMuted ? <Volume2 className="w-3.5 h-3.5" /> : <VolumeX className="w-3.5 h-3.5" />}
           </button>
-
           <button
             onClick={onTogglePause}
             className={`p-1.5 rounded-lg border transition-all ${
@@ -193,53 +182,54 @@ export const HUD: React.FC<HUDProps> = ({
         </div>
       </div>
 
-      {/* Bottom Spiral Progress Bar across Ten Turns */}
-      <div
-        className={`w-full flex items-center justify-between px-3 py-1.5 rounded-xl border text-[10px] ${
-          isDay
-            ? 'bg-[#f8f4eb]/80 border-[#b8860b]/20 text-[#2c2017]'
-            : 'bg-[#0d0907]/80 border-[#d4af37]/20 text-[#d4af37]'
-        }`}
-      >
-        {Array.from({ length: 10 }).map((_, idx) => {
-          const turnNum = idx + 1;
-          const isCurrent = turnNum === turnConfig.id;
-          const isPassed = turnNum < turnConfig.id;
-
-          return (
-            <div key={turnNum} className="flex flex-col items-center">
-              <div
-                className={`w-2.5 h-2.5 rounded-full flex items-center justify-center transition-all ${
-                  isCurrent
-                    ? isDay
-                      ? 'bg-[#b8860b] border border-[#f8f4eb] shadow-[0_0_8px_#b8860b] scale-125'
-                      : 'bg-[#d4af37] border border-[#f5deb3] shadow-[0_0_8px_#d4af37] scale-125'
-                    : isPassed
-                    ? isDay
-                      ? 'bg-[#b8860b]/50 border border-[#b8860b]/70'
-                      : 'bg-[#d4af37]/40 border border-[#d4af37]/60'
-                    : isDay
-                    ? 'bg-[#ede4d4] border border-[#b8860b]/20 opacity-40'
-                    : 'bg-[#1a140f] border border-[#d4af37]/20 opacity-40'
-                }`}
-              >
-                {isCurrent && <div className={`w-1 h-1 rounded-full ${isDay ? 'bg-[#f8f4eb]' : 'bg-[#0d0907]'}`} />}
+      {/* Bottom Spiral Progress Bar across Ten Turns - only shown in 10 TURNS Story mode */}
+      {gameMode === 'TURNS' && (
+        <div
+          className={`w-full flex items-center justify-between px-3 py-1.5 rounded-xl border text-[10px] ${
+            isDay
+              ? 'bg-[#f8f4eb]/80 border-[#b8860b]/20 text-[#2c2017]'
+              : 'bg-[#0d0907]/80 border-[#d4af37]/20 text-[#d4af37]'
+          }`}
+        >
+          {Array.from({ length: 10 }).map((_, idx) => {
+            const turnNum = idx + 1;
+            const isCurrent = turnNum === turnConfig.id;
+            const isPassed = turnNum < turnConfig.id;
+            return (
+              <div key={turnNum} className="flex flex-col items-center">
+                <div
+                  className={`w-2.5 h-2.5 rounded-full flex items-center justify-center transition-all ${
+                    isCurrent
+                      ? isDay
+                        ? 'bg-[#b8860b] border border-[#f8f4eb] shadow-[0_0_8px_#b8860b] scale-125'
+                        : 'bg-[#d4af37] border border-[#f5deb3] shadow-[0_0_8px_#d4af37] scale-125'
+                      : isPassed
+                      ? isDay
+                        ? 'bg-[#b8860b]/50 border border-[#b8860b]/70'
+                        : 'bg-[#d4af37]/40 border border-[#d4af37]/60'
+                      : isDay
+                      ? 'bg-[#ede4d4] border border-[#b8860b]/20 opacity-40'
+                      : 'bg-[#1a140f] border border-[#d4af37]/20 opacity-40'
+                  }`}
+                >
+                  {isCurrent && <div className={`w-1 h-1 rounded-full ${isDay ? 'bg-[#f8f4eb]' : 'bg-[#0d0907]'}`} />}
+                </div>
+                <span
+                  className={`mt-0.5 text-[9px] font-mono ${
+                    isCurrent
+                      ? isDay ? 'text-[#b8860b] font-bold' : 'text-[#d4af37] font-bold'
+                      : isPassed
+                      ? isDay ? 'text-[#b8860b]' : 'text-[#d4af37]/70'
+                      : isDay ? 'text-[#8c6508]/40' : 'text-[#d4af37]/30'
+                  }`}
+                >
+                  {turnNum}
+                </span>
               </div>
-              <span
-                className={`mt-0.5 text-[9px] font-mono ${
-                  isCurrent
-                    ? isDay ? 'text-[#b8860b] font-bold' : 'text-[#d4af37] font-bold'
-                    : isPassed
-                    ? isDay ? 'text-[#b8860b]' : 'text-[#d4af37]/70'
-                    : isDay ? 'text-[#8c6508]/40' : 'text-[#d4af37]/30'
-                }`}
-              >
-                {turnNum}
-              </span>
-            </div>
-          );
-        })}
-      </div>
+            );
+          })}
+        </div>
+      )}
     </div>
   );
 };

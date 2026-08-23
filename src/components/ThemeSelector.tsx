@@ -11,7 +11,6 @@ interface ThemeSelectorProps {
 export const ThemeSelector: React.FC<ThemeSelectorProps> = ({ className = '', compact = false }) => {
   const { toggleTheme, isDay } = useTheme();
   const { t } = useLanguage();
-
   const currentLabel = isDay ? t.dayTheme : t.nightTheme;
 
   if (compact) {

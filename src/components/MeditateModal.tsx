@@ -15,7 +15,6 @@ export const MeditateModal: React.FC<MeditateModalProps> = ({ onClose }) => {
 
   useEffect(() => {
     soundEngine.startAmbientDrone(10);
-
     let frameId: number;
     let angle = 0;
 

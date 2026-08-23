@@ -1,5 +1,7 @@
 export type TurnId = 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10;
 
+export type GameMode = 'TURNS' | 'ENDLESS';
+
 export type LayerName = 
   | 'SILENCE'
   | 'VISION'
@@ -112,4 +114,12 @@ export interface GameStats {
   totalAbideSeconds: number;
   strikes: number;
   ieouaCompleted: number;
+}
+
+export interface LeaderboardEntry {
+  id: string;
+  name: string;
+  score: number;
+  turn: number;
+  date: string;
 }

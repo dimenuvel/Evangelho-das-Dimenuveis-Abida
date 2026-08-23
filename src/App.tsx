@@ -1,5 +1,5 @@
-import { useState, useEffect, useCallback } from 'react';
-import { GameStats, Cutscene } from './types/game';
+import { useState, useEffect, useCallback, useMemo } from 'react';
+import { GameStats, Cutscene, GameMode, TurnConfig, TurnId } from './types/game';
 import { soundEngine } from './audio/soundEngine';
 import { MainMenu } from './components/MainMenu';
 import { CanvasGame } from './components/CanvasGame';
@@ -10,17 +10,31 @@ import { MeditateModal } from './components/MeditateModal';
 import { SoundLabModal } from './components/SoundLabModal';
 import { GospelLoreModal } from './components/GospelLoreModal';
 import { PauseModal } from './components/PauseModal';
-import { RotateCcw, Home } from 'lucide-react';
+import { GameOverModal } from './components/GameOverModal';
+import { TopScoresModal } from './components/TopScoresModal';
+import { TourModal } from './components/TourModal';
 import { useLanguage } from './context/LanguageContext';
 import { useTheme } from './context/ThemeContext';
 
 type GameState = 'MENU' | 'CUTSCENE' | 'PLAYING' | 'TURN_X_ENDING' | 'GAME_OVER';
-type ModalState = 'NONE' | 'MEDITATE' | 'SOUND_LAB' | 'GOSPEL_LORE';
+type ModalState = 'NONE' | 'MEDITATE' | 'SOUND_LAB' | 'GOSPEL_LORE' | 'TOP_SCORES' | 'TOUR';
 
 const LOCAL_STORAGE_KEY = 'abide_ten_turns_stats_v1';
+const FIRST_RUN_TOUR_KEY = 'abide_first_run_tour_seen_v1';
+
+const ENDLESS_PALETTES = [
+  { theme: '#8b5cf6', accent: '#fbbf24' },
+  { theme: '#3b82f6', accent: '#38bdf8' },
+  { theme: '#10b981', accent: '#6ee7b7' },
+  { theme: '#ef4444', accent: '#fca5a5' },
+  { theme: '#f59e0b', accent: '#fef08a' },
+  { theme: '#a855f7', accent: '#e9d5ff' },
+  { theme: '#ec4899', accent: '#fbcfe8' },
+  { theme: '#06b6d4', accent: '#67e8f9' },
+];
 
 export default function App() {
-  const { t, turnsConfig, getCutsceneForTurn } = useLanguage();
+  const { language, t, turnsConfig, getCutsceneForTurn } = useLanguage();
   const { isDay } = useTheme();
 
   // Game Stats & Storage
@@ -53,7 +67,22 @@ export default function App() {
   // Primary App States
   const [gameState, setGameState] = useState<GameState>('MENU');
   const [modalState, setModalState] = useState<ModalState>('NONE');
+  const [gameMode, setGameMode] = useState<GameMode>('TURNS');
   const [currentTurnId, setCurrentTurnId] = useState<number>(1);
+  const [wave, setWave] = useState<number>(1);
+  const [highlightScoreId, setHighlightScoreId] = useState<string | undefined>(undefined);
+
+  // Auto-open Tour on first run if not seen yet
+  useEffect(() => {
+    try {
+      const tourSeen = localStorage.getItem(FIRST_RUN_TOUR_KEY);
+      if (!tourSeen) {
+        setModalState('TOUR');
+      }
+    } catch {
+      // Ignore
+    }
+  }, []);
 
   // Active Gameplay Variables
   const [lives, setLives] = useState(3);
@@ -86,13 +115,17 @@ export default function App() {
     setIsMuted(muted);
   }, []);
 
-  // Handle Level Select / Start Game
-  const handleSelectTurn = useCallback((turnId: number) => {
+  // Handle Level Select / Start 10 Turns Game
+  const handleSelectTurn = useCallback((turnId: number, isFreshStart: boolean = false) => {
+    setGameMode('TURNS');
     setCurrentTurnId(turnId);
     setLives(3);
     setAbideMeter(20);
     setIsAbideMode(false);
     setIsPaused(false);
+    if (isFreshStart) {
+      setScore(0);
+    }
 
     // Check if turn has a cutscene
     const cs = getCutsceneForTurn(turnId);
@@ -103,6 +136,18 @@ export default function App() {
       setGameState('PLAYING');
     }
   }, [getCutsceneForTurn]);
+
+  // Handle Start Endless Game
+  const handleStartEndless = useCallback(() => {
+    setGameMode('ENDLESS');
+    setWave(1);
+    setScore(0);
+    setLives(3);
+    setAbideMeter(20);
+    setIsAbideMode(false);
+    setIsPaused(false);
+    setGameState('PLAYING');
+  }, []);
 
   // Cutscene Finished
   const handleCutsceneComplete = useCallback(() => {
@@ -145,7 +190,6 @@ export default function App() {
   // Turn Complete Handler (Turns 1 - 9)
   const handleTurnComplete = useCallback(() => {
     soundEngine.playAbideActivation();
-
     setStats(prev => {
       const nextUnlocked = Math.max(prev.unlockedTurn, currentTurnId + 1);
       const completed = Array.from(new Set([...prev.turnsCompleted, currentTurnId]));
@@ -155,9 +199,8 @@ export default function App() {
         turnsCompleted: completed
       };
     });
-
     if (currentTurnId < 10) {
-      handleSelectTurn(currentTurnId + 1);
+      handleSelectTurn(currentTurnId + 1, false);
     } else {
       setGameState('TURN_X_ENDING');
     }
@@ -173,7 +216,24 @@ export default function App() {
     setGameState('GAME_OVER');
   }, []);
 
-  const currentTurnConfig = turnsConfig[currentTurnId] || turnsConfig[1];
+  // Dynamic Endless Config
+  const endlessTurnConfig: TurnConfig = useMemo(() => {
+    const palette = ENDLESS_PALETTES[(wave - 1) % ENDLESS_PALETTES.length];
+    return {
+      id: 1 as TurnId,
+      title: language === 'pt' ? `DIMENSÃO CÓSMICA ${wave}` : `COSMIC DIMENSION ${wave}`,
+      subtitle: language === 'pt' ? `MODO INFINITO` : `ENDLESS MODE`,
+      layer: 'INFINITO',
+      description: language === 'pt' ? 'Ondas sem fim da Espiral Cósmica.' : 'Endless waves of the Cosmic Spiral.',
+      themeColor: palette.theme,
+      accentColor: palette.accent,
+      ballSpeed: Math.min(8.5, 4.8 + (wave - 1) * 0.25),
+      bgSymbol: '∞',
+      quote: language === 'pt' ? 'A Espiral não tem começo nem fim.' : 'The Spiral has no beginning and no end.'
+    };
+  }, [wave, language]);
+
+  const activeTurnConfig = gameMode === 'ENDLESS' ? endlessTurnConfig : (turnsConfig[currentTurnId] || turnsConfig[1]);
 
   return (
     <div
@@ -185,10 +245,16 @@ export default function App() {
       {gameState === 'MENU' && (
         <MainMenu
           stats={stats}
-          onSelectTurn={handleSelectTurn}
+          onSelectTurn={(turnId) => handleSelectTurn(turnId, true)}
+          onStartEndless={handleStartEndless}
           onOpenMeditate={() => setModalState('MEDITATE')}
           onOpenSoundLab={() => setModalState('SOUND_LAB')}
           onOpenGospelLore={() => setModalState('GOSPEL_LORE')}
+          onOpenTopScores={() => {
+            setHighlightScoreId(undefined);
+            setModalState('TOP_SCORES');
+          }}
+          onOpenTour={() => setModalState('TOUR')}
         />
       )}
 
@@ -203,30 +269,34 @@ export default function App() {
       {/* 3. PLAYING GAME STATE */}
       {gameState === 'PLAYING' && (
         <div
-          className={`relative w-full h-full flex flex-col items-center justify-start pt-1 sm:pt-2.5 pb-2 px-2 max-w-lg mx-auto border-x-2 overflow-hidden transition-colors duration-300 ${
+          className={`relative w-full h-full flex flex-col items-center justify-start pt-1 sm:pt-2 pb-1.5 px-2 max-w-xl mx-auto border-x-2 overflow-hidden transition-colors duration-300 ${
             isDay ? 'bg-[#f8f4eb] border-[#ede4d4]' : 'bg-[#0d0907] border-[#1a140f]'
           }`}
         >
-          <div className="w-full max-w-[480px] flex flex-col items-center justify-start space-y-1.5 flex-1 min-h-0">
+          <div className="w-full max-w-[500px] flex flex-col items-center justify-start space-y-1 flex-1 min-h-0">
             <HUD
-              turnConfig={currentTurnConfig}
+              turnConfig={activeTurnConfig}
               lives={lives}
               score={score}
               abideMeter={abideMeter}
               isAbideMode={isAbideMode}
               isMuted={isMuted}
               isPaused={isPaused}
+              gameMode={gameMode}
+              wave={wave}
               vibrationEnabled={vibrationEnabled}
               onToggleMute={handleToggleMute}
               onTogglePause={() => setIsPaused(prev => !prev)}
               onToggleVibration={() => setVibrationEnabled(prev => !prev)}
             />
-
             <CanvasGame
-              turnConfig={currentTurnConfig}
+              turnConfig={activeTurnConfig}
               lives={lives}
               score={score}
               abideMeter={abideMeter}
+              gameMode={gameMode}
+              wave={wave}
+              onWaveChange={setWave}
               onScoreUpdate={handleScoreUpdate}
               onLivesUpdate={setLives}
               onAbideUpdate={handleAbideUpdate}
@@ -246,7 +316,11 @@ export default function App() {
               onResume={() => setIsPaused(false)}
               onRestartTurn={() => {
                 setIsPaused(false);
-                handleSelectTurn(currentTurnId);
+                if (gameMode === 'ENDLESS') {
+                  handleStartEndless();
+                } else {
+                  handleSelectTurn(currentTurnId, true);
+                }
               }}
               onReturnToMenu={() => {
                 setIsPaused(false);
@@ -264,75 +338,42 @@ export default function App() {
       {/* 4. TURN X ENDING CINEMATIC */}
       {gameState === 'TURN_X_ENDING' && (
         <TurnXEnding
-          onFinish={() => setGameState('MENU')}
+          onFinish={() => setGameState('GAME_OVER')}
         />
       )}
 
-      {/* 5. GAME OVER STATE */}
+      {/* 5. GAME OVER / END GAME STATE */}
       {gameState === 'GAME_OVER' && (
-        <div
-          className={`fixed inset-0 z-50 flex items-center justify-center p-4 backdrop-blur-2xl transition-colors duration-300 ${
-            isDay ? 'bg-[#f8f4eb]/90' : 'bg-[#0d0907]/95'
-          }`}
-        >
-          <div
-            className={`w-full max-w-xs rounded-2xl border-2 p-6 flex flex-col items-center text-center space-y-4 shadow-2xl transition-all ${
-              isDay
-                ? 'bg-[#f8f4eb] border-[#b8860b]/40 text-[#2c2017] shadow-[0_0_50px_rgba(184,134,11,0.2)]'
-                : 'bg-[#0d0907] border-[#d4af37]/40 text-[#d4af37] shadow-[0_0_50px_rgba(212,175,55,0.25)]'
-            }`}
-          >
-            <div
-              className={`w-12 h-12 rounded-full border flex items-center justify-center ${
-                isDay ? 'border-[#b8860b] bg-[#ede4d4]' : 'border-[#d4af37] bg-[#1a140f]'
-              }`}
-            >
-              <span className="text-2xl filter contrast-125">🧘‍♂️</span>
-            </div>
-            <h2
-              className={`text-sm font-cinzel font-bold tracking-[0.25em] uppercase ${
-                isDay ? 'text-[#2c2017]' : 'text-[#d4af37]'
-              }`}
-            >
-              {t.gameOverTitle}
-            </h2>
-            <p className={`text-xs font-serif italic leading-relaxed ${isDay ? 'text-[#634e3f]' : 'text-[#f5deb3]/80'}`}>
-              {t.gameOverQuote}
-            </p>
-
-            <div className="w-full space-y-2 pt-2">
-              <button
-                onClick={() => handleSelectTurn(currentTurnId)}
-                className={`w-full py-3 font-cinzel font-bold text-xs tracking-[0.25em] uppercase rounded-xl hover:opacity-90 transition-all flex items-center justify-center space-x-2 ${
-                  isDay
-                    ? 'bg-gradient-to-r from-[#b8860b] via-[#e5c158] to-[#b8860b] text-[#1f160e] shadow-[0_0_15px_rgba(184,134,11,0.3)]'
-                    : 'bg-gradient-to-r from-[#d4af37] to-[#f5deb3] text-[#0d0907] shadow-[0_0_15px_rgba(212,175,55,0.4)]'
-                }`}
-              >
-                <RotateCcw className="w-4 h-4" />
-                <span>{t.tryAgain} {currentTurnId}</span>
-              </button>
-
-              <button
-                onClick={() => setGameState('MENU')}
-                className={`w-full py-2.5 border font-serif font-semibold text-xs tracking-[0.2em] uppercase rounded-xl transition-all flex items-center justify-center space-x-2 ${
-                  isDay
-                    ? 'bg-[#ede4d4] border-[#b8860b]/30 text-[#2c2017] hover:bg-[#b8860b]/15'
-                    : 'bg-[#1a140f] border-[#d4af37]/30 text-[#d4af37] hover:bg-[#d4af37]/10'
-                }`}
-              >
-                <Home className="w-3.5 h-3.5" />
-                <span>{t.returnToMenu}</span>
-              </button>
-            </div>
-          </div>
-        </div>
+        <GameOverModal
+          score={score}
+          turnId={gameMode === 'ENDLESS' ? 999 : currentTurnId}
+          gameMode={gameMode}
+          onTryAgain={() => {
+            if (gameMode === 'ENDLESS') {
+              handleStartEndless();
+            } else {
+              handleSelectTurn(currentTurnId, true);
+            }
+          }}
+          onReturnToMenu={() => setGameState('MENU')}
+          onOpenTopScores={(savedId) => {
+            setHighlightScoreId(savedId);
+            setModalState('TOP_SCORES');
+          }}
+        />
       )}
 
       {/* OPTIONAL MODALS */}
       {modalState === 'MEDITATE' && <MeditateModal onClose={() => setModalState('NONE')} />}
       {modalState === 'SOUND_LAB' && <SoundLabModal onClose={() => setModalState('NONE')} />}
       {modalState === 'GOSPEL_LORE' && <GospelLoreModal onClose={() => setModalState('NONE')} />}
+      {modalState === 'TOP_SCORES' && (
+        <TopScoresModal
+          highlightId={highlightScoreId}
+          onClose={() => setModalState('NONE')}
+        />
+      )}
+      {modalState === 'TOUR' && <TourModal onClose={() => setModalState('NONE')} />}
     </div>
   );
 }

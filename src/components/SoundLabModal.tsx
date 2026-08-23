@@ -33,6 +33,7 @@ export const SoundLabModal: React.FC<SoundLabModalProps> = ({ onClose }) => {
     const nextStep = (activeVowelSeq % 5) + 1;
     setActiveVowelSeq(nextStep);
     soundEngine.playIEOUAVowel(vowel, nextStep);
+
     if (nextStep === 5) {
       setTimeout(() => {
         soundEngine.playIEOUASequenceComplete();
@@ -152,7 +153,6 @@ export const SoundLabModal: React.FC<SoundLabModalProps> = ({ onClose }) => {
           >
             {t.turnsSoundscapesTitle}
           </span>
-
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs font-serif">
             {Object.values(turnsConfig).map(turn => {
               const isPlaying = activeTurnDrone === turn.id;
@@ -178,7 +178,6 @@ export const SoundLabModal: React.FC<SoundLabModalProps> = ({ onClose }) => {
                       {turn.title}
                     </span>
                   </div>
-
                   <div
                     className={`shrink-0 p-1.5 rounded-lg border ${
                       isDay ? 'bg-[#f8f4eb] border-[#b8860b]/40' : 'bg-[#0d0907] border-[#d4af37]/40'
@@ -205,7 +204,6 @@ export const SoundLabModal: React.FC<SoundLabModalProps> = ({ onClose }) => {
           >
             {t.gameplaySynthTitle}
           </span>
-
           <div className="grid grid-cols-2 gap-2 text-xs font-serif">
             <button
               onClick={() => soundEngine.playPaddleHit(1.0)}
@@ -218,7 +216,6 @@ export const SoundLabModal: React.FC<SoundLabModalProps> = ({ onClose }) => {
               <Volume2 className={`w-4 h-4 shrink-0 ${isDay ? 'text-[#b8860b]' : 'text-[#d4af37]'}`} />
               <span>{t.rugBounce}</span>
             </button>
-
             <button
               onClick={() => soundEngine.playPinStrike()}
               className={`flex items-center space-x-2 p-2.5 border rounded-xl transition-all ${
@@ -230,7 +227,6 @@ export const SoundLabModal: React.FC<SoundLabModalProps> = ({ onClose }) => {
               <Sparkles className={`w-4 h-4 shrink-0 ${isDay ? 'text-[#b8860b]' : 'text-[#d4af37]'}`} />
               <span>{t.pinStrike}</span>
             </button>
-
             <button
               onClick={() => soundEngine.playAbideActivation()}
               className={`flex items-center space-x-2 p-2.5 border rounded-xl transition-all ${
@@ -242,7 +238,6 @@ export const SoundLabModal: React.FC<SoundLabModalProps> = ({ onClose }) => {
               <Sparkles className={`w-4 h-4 shrink-0 ${isDay ? 'text-[#b8860b]' : 'text-[#d4af37]'}`} />
               <span>{t.abideChord}</span>
             </button>
-
             <button
               onClick={() => soundEngine.playVoidTrigger()}
               className={`flex items-center space-x-2 p-2.5 border rounded-xl transition-all ${

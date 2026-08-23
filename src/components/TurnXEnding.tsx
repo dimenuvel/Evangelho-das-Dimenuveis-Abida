@@ -22,7 +22,6 @@ export const TurnXEnding: React.FC<TurnXEndingProps> = ({ onFinish }) => {
 
   useEffect(() => {
     soundEngine.playAbideActivation();
-
     const interval = setInterval(() => {
       setStep(prev => {
         if (prev < lines.length - 1) {

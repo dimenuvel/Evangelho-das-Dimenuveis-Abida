@@ -1,5 +1,5 @@
 import React, { useRef, useEffect, useState, useCallback } from 'react';
-import { TurnConfig, Block, Particle, PowerUp, FloatingText, ElementType, TurnId } from '../types/game';
+import { TurnConfig, Block, Particle, PowerUp, FloatingText, ElementType } from '../types/game';
 import { soundEngine } from '../audio/soundEngine';
 import { useTheme } from '../context/ThemeContext';
 import { useLanguage } from '../context/LanguageContext';
@@ -9,6 +9,9 @@ interface CanvasGameProps {
   lives: number;
   score: number;
   abideMeter: number;
+  gameMode?: 'TURNS' | 'ENDLESS';
+  wave?: number;
+  onWaveChange?: (newWave: number) => void;
   onScoreUpdate: (newScore: number) => void;
   onLivesUpdate: (newLives: number) => void;
   onAbideUpdate: (newAbide: number | ((prev: number) => number)) => void;
@@ -22,14 +25,16 @@ interface CanvasGameProps {
 }
 
 const GAME_WIDTH = 480;
-const GAME_HEIGHT = 440;
+const GAME_HEIGHT = 528; // Increased bottom gameplay section by 20%
 const IEOUA_SEQ: Array<'I' | 'E' | 'O' | 'U' | 'A'> = ['I', 'E', 'O', 'U', 'A'];
 
 export const CanvasGame: React.FC<CanvasGameProps> = ({
   turnConfig,
   lives,
   score,
-  abideMeter,
+  gameMode = 'TURNS',
+  wave = 1,
+  onWaveChange,
   onScoreUpdate,
   onLivesUpdate,
   onAbideUpdate,
@@ -38,17 +43,16 @@ export const CanvasGame: React.FC<CanvasGameProps> = ({
   onGameOver,
   isPaused,
   isAbideMode,
-  setIsAbideMode,
   vibrationEnabled
 }) => {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const { isDay } = useTheme();
-  const { t, language } = useLanguage();
+  const { language } = useLanguage();
 
   // Gameplay state refs
   const paddleRef = useRef({
     x: GAME_WIDTH / 2 - 45,
-    y: GAME_HEIGHT - 30,
+    y: GAME_HEIGHT - 36,
     width: 90,
     height: 14,
     targetX: GAME_WIDTH / 2 - 45,
@@ -58,7 +62,7 @@ export const CanvasGame: React.FC<CanvasGameProps> = ({
 
   const ballRef = useRef({
     x: GAME_WIDTH / 2,
-    y: GAME_HEIGHT - 46,
+    y: GAME_HEIGHT - 52,
     vx: 3,
     vy: -4.5,
     radius: 8,
@@ -71,7 +75,7 @@ export const CanvasGame: React.FC<CanvasGameProps> = ({
   const particlesRef = useRef<Particle[]>([]);
   const powerUpsRef = useRef<PowerUp[]>([]);
   const floatingTextsRef = useRef<FloatingText[]>([]);
-  
+
   // States & powerups
   const ieouaIndexRef = useRef<number>(0);
   const activeElementsRef = useRef<{ fire: number; air: number; water: number; earth: number }>({
@@ -83,7 +87,6 @@ export const CanvasGame: React.FC<CanvasGameProps> = ({
 
   // Void trap states
   const voidInvertedControlsRef = useRef<number>(0); // remaining frames
-  const voidMessageRef = useRef<string | null>(null);
 
   // Turn X state
   const turnXEnteredCenterRef = useRef<boolean>(false);
@@ -97,6 +100,12 @@ export const CanvasGame: React.FC<CanvasGameProps> = ({
   // UI / HUD state
   const [ieouaDisplay, setIeouaDisplay] = useState<string[]>([]);
   const [activeWarning, setActiveWarning] = useState<string | null>(null);
+  const [activeElementsState, setActiveElementsState] = useState<{
+    fire: boolean;
+    air: boolean;
+    water: boolean;
+    earth: boolean;
+  }>({ fire: false, air: false, water: false, earth: false });
 
   // Trigger vibration if supported
   const triggerHaptic = useCallback((ms: number = 25) => {
@@ -116,6 +125,9 @@ export const CanvasGame: React.FC<CanvasGameProps> = ({
     isDay,
     turnConfig,
     language,
+    gameMode,
+    wave,
+    onWaveChange,
     onScoreUpdate,
     onLivesUpdate,
     onAbideUpdate,
@@ -133,6 +145,9 @@ export const CanvasGame: React.FC<CanvasGameProps> = ({
       isDay,
       turnConfig,
       language,
+      gameMode,
+      wave,
+      onWaveChange,
       onScoreUpdate,
       onLivesUpdate,
       onAbideUpdate,
@@ -157,8 +172,168 @@ export const CanvasGame: React.FC<CanvasGameProps> = ({
     });
   };
 
+  // Build Endless Wave Blocks
+  const generateEndlessWaveBlocks = useCallback((waveNum: number, themeColor: string, accentColor: string): Block[] => {
+    const blocks: Block[] = [];
+    const cols = 7;
+    const blockWidth = 56;
+    const blockHeight = 16;
+    const startX = (GAME_WIDTH - (cols * (blockWidth + 6) - 6)) / 2;
+    const startY = 42;
+    let idCounter = 0;
+
+    const archetype = (waveNum - 1) % 5;
+    const rows = Math.min(5, 3 + Math.floor(waveNum / 4));
+
+    if (archetype === 4) {
+      // Concentric Ring pattern
+      const centerX = GAME_WIDTH / 2;
+      const centerY = 135;
+      const numRings = Math.min(3, 2 + Math.floor(waveNum / 6));
+      const radiusStep = 30;
+
+      for (let r = 1; r <= numRings; r++) {
+        const radius = r * radiusStep + 16;
+        const count = r * 7;
+        for (let i = 0; i < count; i++) {
+          const angle = (i / count) * Math.PI * 2;
+          const bx = centerX + Math.cos(angle) * radius - blockWidth / 2;
+          const by = centerY + Math.sin(angle) * radius - blockHeight / 2;
+          const isArmored = (r + i) % 3 === 0 && waveNum > 2;
+          blocks.push({
+            id: `endless_ring_${waveNum}_${idCounter++}`,
+            x: bx,
+            y: by,
+            width: blockWidth,
+            height: blockHeight,
+            type: isArmored ? 'armored' : 'normal',
+            hitsRequired: isArmored ? 2 : 1,
+            hitsTaken: 0,
+            color: isArmored ? '#ea580c' : themeColor,
+            glowColor: accentColor,
+            visible: true
+          });
+        }
+      }
+    } else {
+      // Grid with randomized procedural archetypes
+      for (let r = 0; r < rows; r++) {
+        for (let c = 0; c < cols; c++) {
+          if (archetype === 0 && (r + c) % 2 === 1 && r === 0) continue;
+          if (archetype === 2 && (c === 0 || c === cols - 1) && r > 2) continue;
+
+          const bx = startX + c * (blockWidth + 6);
+          const by = startY + r * (blockHeight + 5);
+
+          let type: Block['type'] = 'normal';
+          let hitsRequired = 1;
+          let color = themeColor;
+          let glowColor = accentColor;
+          let visible = true;
+          let elementType: ElementType | undefined;
+
+          const rand = Math.random();
+
+          if (archetype === 0) {
+            // Elemental focus
+            if (rand < 0.45) {
+              type = 'element';
+              const elems: ElementType[] = ['FIRE', 'AIR', 'WATER', 'EARTH'];
+              elementType = elems[(r + c + waveNum) % 4];
+              color = elementType === 'FIRE' ? '#ef4444' : elementType === 'AIR' ? '#38bdf8' : elementType === 'WATER' ? '#3b82f6' : '#10b981';
+            }
+          } else if (archetype === 1) {
+            // Void illusions & Invisible
+            if (rand < 0.25) {
+              type = 'invisible';
+              visible = false;
+            } else if (rand < 0.4) {
+              type = 'void_illusion';
+              color = '#a855f7';
+            }
+          } else if (archetype === 2) {
+            // Armored & Connected
+            if (r < 2 && rand < 0.6) {
+              type = 'armored';
+              hitsRequired = waveNum > 4 ? 3 : 2;
+              color = '#ea580c';
+            } else if (rand < 0.3) {
+              type = 'connected';
+              color = '#ec4899';
+            }
+          } else if (archetype === 3) {
+            // Energy drift
+            if (rand < 0.5) {
+              type = 'energy';
+              color = '#10b981';
+            }
+          }
+
+          blocks.push({
+            id: `endless_${waveNum}_${r}_${c}_${idCounter++}`,
+            x: bx,
+            y: by,
+            width: blockWidth,
+            height: blockHeight,
+            type,
+            elementType,
+            hitsRequired,
+            hitsTaken: 0,
+            color,
+            glowColor,
+            visible,
+            originalX: bx,
+            originalY: by,
+            dx: (c % 2 === 0 ? 1 : -1) * 0.8
+          });
+        }
+      }
+    }
+
+    // Add Bowling Pin Formations in select endless waves
+    if (archetype === 3 || waveNum % 2 === 0) {
+      const pinWidth = 16;
+      const pinHeight = 22;
+      const pinX = GAME_WIDTH / 2;
+      const pinY = 38;
+
+      const pinPositions = [
+        { x: pinX, y: pinY },
+        { x: pinX - 14, y: pinY - 16 },
+        { x: pinX + 14, y: pinY - 16 },
+        { x: pinX - 28, y: pinY - 30 },
+        { x: pinX, y: pinY - 30 },
+        { x: pinX + 28, y: pinY - 30 }
+      ];
+
+      pinPositions.forEach((pos, idx) => {
+        blocks.push({
+          id: `pin_endless_${waveNum}_${idx}`,
+          x: pos.x - pinWidth / 2,
+          y: pos.y - pinHeight / 2,
+          width: pinWidth,
+          height: pinHeight,
+          type: 'pin',
+          hitsRequired: 1,
+          hitsTaken: 0,
+          color: '#ffffff',
+          glowColor: 'rgba(251, 191, 36, 0.8)',
+          visible: true,
+          isPin: true
+        });
+      });
+    }
+
+    return blocks;
+  }, []);
+
   // Build Blocks for Turn
   const initTurnBlocks = useCallback(() => {
+    if (gameMode === 'ENDLESS') {
+      blocksRef.current = generateEndlessWaveBlocks(wave, turnConfig.themeColor, turnConfig.accentColor);
+      return;
+    }
+
     const turnId = turnConfig.id;
     const blocks: Block[] = [];
     const rows = turnId === 1 ? 3 : turnId === 10 ? 3 : 4;
@@ -167,7 +342,6 @@ export const CanvasGame: React.FC<CanvasGameProps> = ({
     const blockHeight = 16;
     const startX = (GAME_WIDTH - (cols * (blockWidth + 6) - 6)) / 2;
     const startY = 45;
-
     let idCounter = 0;
 
     if (turnId === 10) {
@@ -184,7 +358,6 @@ export const CanvasGame: React.FC<CanvasGameProps> = ({
           const angle = (i / count) * Math.PI * 2;
           const bx = centerX + Math.cos(angle) * radius - blockWidth / 2;
           const by = centerY + Math.sin(angle) * radius - blockHeight / 2;
-
           blocks.push({
             id: `b_tx_${idCounter++}`,
             x: bx,
@@ -298,7 +471,7 @@ export const CanvasGame: React.FC<CanvasGameProps> = ({
     }
 
     blocksRef.current = blocks;
-  }, [turnConfig.id]);
+  }, [turnConfig.id, turnConfig.themeColor, turnConfig.accentColor]);
 
   // Init Game State on Turn Mount
   useEffect(() => {
@@ -310,7 +483,7 @@ export const CanvasGame: React.FC<CanvasGameProps> = ({
     paddleRef.current.targetX = GAME_WIDTH / 2 - 45;
     ballRef.current.stuck = true;
     ballRef.current.x = GAME_WIDTH / 2;
-    ballRef.current.y = GAME_HEIGHT - 46;
+    ballRef.current.y = GAME_HEIGHT - 52;
     ballRef.current.fireMode = false;
 
     // Reset Turn X center
@@ -349,7 +522,6 @@ export const CanvasGame: React.FC<CanvasGameProps> = ({
         launchBall();
       }
     };
-
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [isPaused, launchBall]);
@@ -360,14 +532,11 @@ export const CanvasGame: React.FC<CanvasGameProps> = ({
     const rect = canvasRef.current.getBoundingClientRect();
     const scaleX = GAME_WIDTH / rect.width;
     const canvasX = (clientX - rect.left) * scaleX;
-
     let targetX = canvasX - paddleRef.current.width / 2;
-
     if (voidInvertedControlsRef.current > 0) {
       // Inverted void control!
       targetX = GAME_WIDTH - targetX - paddleRef.current.width;
     }
-
     paddleRef.current.targetX = Math.max(0, Math.min(GAME_WIDTH - paddleRef.current.width, targetX));
   };
 
@@ -385,11 +554,31 @@ export const CanvasGame: React.FC<CanvasGameProps> = ({
         // --- 1. UPDATE GAME PHYSICS & LOGIC --- //
 
         // Active Element timers decay
-        if (activeElementsRef.current.fire > 0) activeElementsRef.current.fire--;
-        if (activeElementsRef.current.air > 0) activeElementsRef.current.air--;
-        if (activeElementsRef.current.water > 0) activeElementsRef.current.water--;
-        if (activeElementsRef.current.earth > 0) activeElementsRef.current.earth--;
-
+        let elementsChanged = false;
+        if (activeElementsRef.current.fire > 0) {
+          activeElementsRef.current.fire--;
+          if (activeElementsRef.current.fire === 0) elementsChanged = true;
+        }
+        if (activeElementsRef.current.air > 0) {
+          activeElementsRef.current.air--;
+          if (activeElementsRef.current.air === 0) elementsChanged = true;
+        }
+        if (activeElementsRef.current.water > 0) {
+          activeElementsRef.current.water--;
+          if (activeElementsRef.current.water === 0) elementsChanged = true;
+        }
+        if (activeElementsRef.current.earth > 0) {
+          activeElementsRef.current.earth--;
+          if (activeElementsRef.current.earth === 0) elementsChanged = true;
+        }
+        if (elementsChanged) {
+          setActiveElementsState({
+            fire: activeElementsRef.current.fire > 0,
+            air: activeElementsRef.current.air > 0,
+            water: activeElementsRef.current.water > 0,
+            earth: activeElementsRef.current.earth > 0
+          });
+        }
         if (voidInvertedControlsRef.current > 0) voidInvertedControlsRef.current--;
 
         // Update Paddle size based on Abide Mode / Water Element
@@ -407,7 +596,6 @@ export const CanvasGame: React.FC<CanvasGameProps> = ({
         }
 
         const b = ballRef.current;
-
         if (b.stuck) {
           b.x = p.x + p.width / 2;
           b.y = p.y - b.radius - 2;
@@ -448,7 +636,13 @@ export const CanvasGame: React.FC<CanvasGameProps> = ({
               // Earth barrier save!
               b.vy = -Math.abs(b.vy);
               activeElementsRef.current.earth = 0; // consumed
-              addFloatingText('EARTH PROTECTS', b.x, GAME_HEIGHT - 30, '#10b981', 20);
+              addFloatingText(
+                stateRef.current.language === 'pt' ? '🛡️ A TERRA PROTEGE!' : '🛡️ EARTH PROTECTS!',
+                b.x - 20,
+                GAME_HEIGHT - 30,
+                '#10b981',
+                18
+              );
               soundEngine.playPowerUp('EARTH');
               stateRef.current.triggerHaptic(50);
             } else {
@@ -477,16 +671,13 @@ export const CanvasGame: React.FC<CanvasGameProps> = ({
             b.vy > 0
           ) {
             b.y = p.y - b.radius;
-
             // Hit angle relative to center of rug
             const hitPos = (b.x - (p.x + p.width / 2)) / (p.width / 2);
             const maxAngle = (60 * Math.PI) / 180;
             const angle = hitPos * maxAngle;
             const currentSpeed = Math.sqrt(b.vx * b.vx + b.vy * b.vy);
-
             b.vx = currentSpeed * Math.sin(angle);
             b.vy = -currentSpeed * Math.cos(angle);
-
             soundEngine.playPaddleHit(Math.abs(hitPos) + 0.8);
             stateRef.current.triggerHaptic(15);
 
@@ -507,7 +698,6 @@ export const CanvasGame: React.FC<CanvasGameProps> = ({
           blocks.forEach(block => {
             if (block.isPin && block.visible) activePinsCount++;
             if (!block.isPin && block.visible) remainingNormalBlocks++;
-
             if (!block.visible) return;
 
             // Turn II: Vision - reveal invisible blocks when ball approaches!
@@ -527,9 +717,14 @@ export const CanvasGame: React.FC<CanvasGameProps> = ({
               if (block.type === 'void_illusion') {
                 block.visible = false;
                 soundEngine.playVoidTrigger();
-                addFloatingText('ILLUSION', block.x, block.y, '#c084fc', 16);
+                addFloatingText(
+                  stateRef.current.language === 'pt' ? '👁️ ILUSÃO DO VAZIO' : '👁️ VOID ILLUSION',
+                  block.x - 10,
+                  block.y,
+                  '#c084fc',
+                  16
+                );
                 stateRef.current.onAbideUpdate(prev => Math.max(0, prev - 10));
-
                 if (Math.random() < 0.5) {
                   voidInvertedControlsRef.current = 240; // 4 seconds inverted
                   setActiveWarning(stateRef.current.language === 'pt' ? 'RECONHEÇA O PADRÃO' : 'RECOGNIZE THE PATTERN');
@@ -545,7 +740,13 @@ export const CanvasGame: React.FC<CanvasGameProps> = ({
               if (block.isPin) {
                 soundEngine.playPinStrike();
                 stateRef.current.triggerHaptic(40);
-                addFloatingText('STRIKE!', block.x, block.y, '#fbbf24', 20);
+                addFloatingText(
+                  stateRef.current.language === 'pt' ? 'STRIKE!' : 'STRIKE!',
+                  block.x,
+                  block.y,
+                  '#fbbf24',
+                  20
+                );
                 stateRef.current.onScoreUpdate(stateRef.current.score + 150);
                 stateRef.current.onAbideUpdate(prev => Math.min(100, prev + 10));
               }
@@ -585,7 +786,6 @@ export const CanvasGame: React.FC<CanvasGameProps> = ({
                 if (currVowel) {
                   soundEngine.playIEOUAVowel(currVowel, ieouaIndexRef.current + 1);
                   addFloatingText(currVowel, block.x + block.width / 2, block.y, '#38bdf8', 22);
-
                   const nextSeq = [...ieouaDisplay, currVowel];
                   setIeouaDisplay(nextSeq);
                   ieouaIndexRef.current++;
@@ -594,7 +794,13 @@ export const CanvasGame: React.FC<CanvasGameProps> = ({
                     // IEOUA Sequence Completed!
                     ieouaIndexRef.current = 0;
                     setIeouaDisplay([]);
-                    addFloatingText('I E O U A  HARMONY', GAME_WIDTH / 2 - 80, 200, '#fbbf24', 24);
+                    addFloatingText(
+                      stateRef.current.language === 'pt' ? '✨ HARMONIA I E O U A' : '✨ I E O U A HARMONY',
+                      GAME_WIDTH / 2 - 90,
+                      200,
+                      '#fbbf24',
+                      22
+                    );
                     stateRef.current.onScoreUpdate(stateRef.current.score + 500);
                     stateRef.current.onAbideUpdate(prev => Math.min(100, prev + 25));
                     soundEngine.playIEOUASequenceComplete();
@@ -611,7 +817,6 @@ export const CanvasGame: React.FC<CanvasGameProps> = ({
                 const overlapBottom = (block.y + block.height) - (b.y - b.radius);
 
                 const minOverlap = Math.min(overlapLeft, overlapRight, overlapTop, overlapBottom);
-
                 if (minOverlap === overlapLeft || minOverlap === overlapRight) {
                   b.vx = -b.vx;
                 } else {
@@ -622,22 +827,62 @@ export const CanvasGame: React.FC<CanvasGameProps> = ({
           });
 
           // Check Strike bonus if all pins cleared
-          if ([2, 4, 6, 8].includes(stateRef.current.turnConfig.id) && activePinsCount === 0 && blocks.some(bl => bl.isPin)) {
+          if ((stateRef.current.gameMode === 'ENDLESS' || [2, 4, 6, 8].includes(stateRef.current.turnConfig.id)) && activePinsCount === 0 && blocks.some(bl => bl.isPin)) {
             addFloatingText(stateRef.current.language === 'pt' ? 'ABIDA — STRIKE PERFEITO' : 'ABIDE — PERFECT STRIKE', GAME_WIDTH / 2 - 90, 180, '#fbbf24', 22);
             stateRef.current.onScoreUpdate(stateRef.current.score + 1000);
             stateRef.current.onAbideUpdate(prev => Math.min(100, prev + 30));
           }
 
-          // Check Turn Completion condition (except Turn X)
-          if (stateRef.current.turnConfig.id !== 10 && remainingNormalBlocks === 0) {
-            stateRef.current.onTurnComplete();
+          // Check Turn Completion / Endless Wave Progression
+          if (remainingNormalBlocks === 0) {
+            if (stateRef.current.gameMode === 'ENDLESS') {
+              const currentWave = stateRef.current.wave || 1;
+              const nextWave = currentWave + 1;
+              const waveBonus = 1000 + nextWave * 250;
+              
+              soundEngine.playIEOUASequenceComplete();
+              soundEngine.playAbideActivation();
+              
+              stateRef.current.onScoreUpdate(stateRef.current.score + waveBonus);
+              stateRef.current.onAbideUpdate(prev => Math.min(100, prev + 35));
+              
+              addFloatingText(
+                stateRef.current.language === 'pt' ? `ONDA ${nextWave}! +${waveBonus}` : `WAVE ${nextWave}! +${waveBonus}`,
+                GAME_WIDTH / 2 - 90,
+                160,
+                '#fbbf24',
+                22
+              );
+              
+              // Spawn wave clear celebration fireworks
+              for (let i = 0; i < 24; i++) {
+                particlesRef.current.push({
+                  x: GAME_WIDTH / 2 + (Math.random() - 0.5) * 200,
+                  y: 120 + (Math.random() - 0.5) * 100,
+                  vx: (Math.random() - 0.5) * 8,
+                  vy: (Math.random() - 0.5) * 8,
+                  size: Math.random() * 5 + 3,
+                  color: ['#fbbf24', '#38bdf8', '#a855f7', '#10b981', '#f43f5e'][Math.floor(Math.random() * 5)],
+                  alpha: 1.0,
+                  decay: 0.02
+                });
+              }
+
+              stateRef.current.onWaveChange?.(nextWave);
+              blocksRef.current = generateEndlessWaveBlocks(
+                nextWave,
+                stateRef.current.turnConfig.themeColor,
+                stateRef.current.turnConfig.accentColor
+              );
+            } else if (stateRef.current.turnConfig.id !== 10) {
+              stateRef.current.onTurnComplete();
+            }
           }
 
           // --- TURN X: RETURN TO CENTER LOGIC --- //
           if (stateRef.current.turnConfig.id === 10 && !turnXEnteredCenterRef.current) {
             const center = turnXCenterOrbRef.current;
             const distToCenter = Math.hypot(b.x - center.x, b.y - center.y);
-
             center.pulse += 0.05;
 
             if (distToCenter <= center.radius) {
@@ -663,12 +908,27 @@ export const CanvasGame: React.FC<CanvasGameProps> = ({
             pw.x <= p.x + p.width
           ) {
             soundEngine.playPowerUp(pw.type);
-            addFloatingText(`${pw.type} ELEMENT`, pw.x, pw.y, '#38bdf8', 16);
+            const elemNames: Record<ElementType, { en: string; pt: string; color: string; emoji: string }> = {
+              FIRE: { en: 'FIRE POWER', pt: 'PODER: FOGO', color: '#ef4444', emoji: '🔥' },
+              AIR: { en: 'AIR GUST', pt: 'SOPRO DE AR', color: '#38bdf8', emoji: '💨' },
+              WATER: { en: 'WATER FLOW', pt: 'FLUXO D\'ÁGUA', color: '#3b82f6', emoji: '💧' },
+              EARTH: { en: 'EARTH SHIELD', pt: 'ESCUDO DA TERRA', color: '#10b981', emoji: '🛡️' }
+            };
+            const info = elemNames[pw.type];
+            const powerupText = stateRef.current.language === 'pt' ? `${info.emoji} ${info.pt}` : `${info.emoji} ${info.en}`;
+            addFloatingText(powerupText, pw.x - 20, pw.y - 10, info.color, 16);
 
             if (pw.type === 'FIRE') activeElementsRef.current.fire = 300; // 5s
             if (pw.type === 'AIR') activeElementsRef.current.air = 300;
             if (pw.type === 'WATER') activeElementsRef.current.water = 300;
             if (pw.type === 'EARTH') activeElementsRef.current.earth = 600;
+
+            setActiveElementsState({
+              fire: activeElementsRef.current.fire > 0,
+              air: activeElementsRef.current.air > 0,
+              water: activeElementsRef.current.water > 0,
+              earth: activeElementsRef.current.earth > 0
+            });
 
             powerUpsRef.current.splice(idx, 1);
           } else if (pw.y > GAME_HEIGHT) {
@@ -692,7 +952,9 @@ export const CanvasGame: React.FC<CanvasGameProps> = ({
         });
       }
 
-      // --- 2. RENDER CANVAS SCENE --      // Background Clear
+      // --- 2. RENDER CANVAS SCENE --- //
+
+      // Background Clear
       ctx.fillStyle = stateRef.current.isDay ? '#f5efe6' : '#09080e'; // Warm serene linen or deep mystical obsidian
       ctx.fillRect(0, 0, GAME_WIDTH, GAME_HEIGHT);
 
@@ -743,8 +1005,8 @@ export const CanvasGame: React.FC<CanvasGameProps> = ({
         const center = turnXCenterOrbRef.current;
         ctx.save();
         ctx.translate(center.x, center.y);
-
         const glowRad = center.radius + Math.sin(center.pulse) * 8;
+
         const grad = ctx.createRadialGradient(0, 0, 5, 0, 0, glowRad + 20);
         grad.addColorStop(0, '#fbbf24');
         grad.addColorStop(0.5, '#f59e0b');
@@ -765,14 +1027,12 @@ export const CanvasGame: React.FC<CanvasGameProps> = ({
           ctx.lineTo(r * Math.cos(a), r * Math.sin(a));
         }
         ctx.stroke();
-
         ctx.restore();
       }
 
       // Render Blocks & Bowling Pins
       blocksRef.current.forEach(block => {
         if (!block.visible) return;
-
         ctx.save();
         ctx.fillStyle = block.color;
         ctx.shadowColor = block.glowColor;
@@ -783,7 +1043,6 @@ export const CanvasGame: React.FC<CanvasGameProps> = ({
           ctx.beginPath();
           ctx.arc(block.x + block.width / 2, block.y + 6, 5, 0, Math.PI * 2); // Pin head
           ctx.fill();
-
           ctx.beginPath();
           ctx.moveTo(block.x + block.width / 2 - 4, block.y + 8);
           ctx.lineTo(block.x + block.width / 2 + 4, block.y + 8);
@@ -791,7 +1050,6 @@ export const CanvasGame: React.FC<CanvasGameProps> = ({
           ctx.lineTo(block.x, block.y + block.height);
           ctx.closePath();
           ctx.fill();
-
           // Red stripe
           ctx.fillStyle = '#ef4444';
           ctx.fillRect(block.x + 3, block.y + 12, block.width - 6, 3);
@@ -809,7 +1067,7 @@ export const CanvasGame: React.FC<CanvasGameProps> = ({
             ctx.fillStyle = '#ffffff';
             ctx.font = '10px sans-serif';
             ctx.textAlign = 'center';
-            ctx.fillText(block.hitsRequired - block.hitsTaken === 2 ? 'ᛟ' : 'ᛉ', block.x + block.width / 2, block.y + 15);
+            ctx.fillText(block.hitsRequired - block.hitsTaken === 2 ? '◆' : '◇', block.x + block.width / 2, block.y + 12);
           }
         }
         ctx.restore();
@@ -951,9 +1209,9 @@ export const CanvasGame: React.FC<CanvasGameProps> = ({
   }, [isPaused]);
 
   return (
-    <div className="relative w-full max-w-[480px] flex flex-col items-center select-none touch-none">
-      {/* Top Header Bar with IEOUA and Active Warnings */}
-      <div className="w-full flex items-center justify-between px-1 mb-1.5 min-h-[28px] z-20">
+    <div className="relative w-full max-w-[500px] flex flex-col items-center select-none touch-none">
+      {/* Top Header Bar with IEOUA, Active Powerups, and Warnings */}
+      <div className="w-full flex items-center justify-between px-1 mb-1.5 min-h-[28px] z-20 gap-1.5 flex-wrap">
         {/* IEOUA Sequence Indicator Badge */}
         <div
           className={`flex items-center space-x-1.5 px-3 py-1 rounded-full border text-xs tracking-wider font-mono ${
@@ -981,6 +1239,50 @@ export const CanvasGame: React.FC<CanvasGameProps> = ({
           ))}
         </div>
 
+        {/* Active Elemental Powerup Badges */}
+        <div className="flex items-center space-x-1.5">
+          {activeElementsState.fire && (
+            <div
+              className={`flex items-center space-x-1 px-2 py-0.5 rounded-full border text-[10px] font-mono font-bold animate-pulse ${
+                isDay ? 'bg-rose-100 border-rose-400 text-rose-800' : 'bg-rose-950/80 border-rose-500/50 text-rose-300'
+              }`}
+            >
+              <span>🔥</span>
+              <span>{language === 'pt' ? 'FOGO' : 'FIRE'}</span>
+            </div>
+          )}
+          {activeElementsState.air && (
+            <div
+              className={`flex items-center space-x-1 px-2 py-0.5 rounded-full border text-[10px] font-mono font-bold animate-pulse ${
+                isDay ? 'bg-sky-100 border-sky-400 text-sky-800' : 'bg-sky-950/80 border-sky-500/50 text-sky-300'
+              }`}
+            >
+              <span>💨</span>
+              <span>{language === 'pt' ? 'AR' : 'AIR'}</span>
+            </div>
+          )}
+          {activeElementsState.water && (
+            <div
+              className={`flex items-center space-x-1 px-2 py-0.5 rounded-full border text-[10px] font-mono font-bold animate-pulse ${
+                isDay ? 'bg-blue-100 border-blue-400 text-blue-800' : 'bg-blue-950/80 border-blue-500/50 text-blue-300'
+              }`}
+            >
+              <span>💧</span>
+              <span>{language === 'pt' ? 'ÁGUA' : 'WATER'}</span>
+            </div>
+          )}
+          {activeElementsState.earth && (
+            <div
+              className={`flex items-center space-x-1 px-2 py-0.5 rounded-full border text-[10px] font-mono font-bold animate-pulse ${
+                isDay ? 'bg-emerald-100 border-emerald-400 text-emerald-800' : 'bg-emerald-950/80 border-emerald-500/50 text-emerald-300'
+              }`}
+            >
+              <span>🛡️</span>
+              <span>{language === 'pt' ? 'TERRA' : 'EARTH'}</span>
+            </div>
+          )}
+        </div>
+
         {/* Active Warning Overlay Banner */}
         {activeWarning && (
           <div
@@ -1005,7 +1307,7 @@ export const CanvasGame: React.FC<CanvasGameProps> = ({
         onTouchMove={e => {
           if (e.touches[0]) handlePointerMove(e.touches[0].clientX);
         }}
-        className={`w-full max-w-[480px] h-auto aspect-[480/440] max-h-[82vh] rounded-2xl border cursor-crosshair touch-none transition-colors duration-300 ${
+        className={`w-full max-w-[500px] h-auto aspect-[480/528] max-h-[85vh] rounded-2xl border cursor-crosshair touch-none transition-colors duration-300 ${
           isDay
             ? 'border-[#b8860b]/30 shadow-[0_0_40px_rgba(184,134,11,0.15)] bg-[#f5efe6]'
             : 'border-amber-500/20 shadow-[0_0_40px_rgba(139,92,246,0.15)] bg-black'

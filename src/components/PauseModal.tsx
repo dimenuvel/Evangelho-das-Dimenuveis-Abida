@@ -41,7 +41,6 @@ export const PauseModal: React.FC<PauseModalProps> = ({
         >
           {t.pausedTitle}
         </h2>
-
         <p className={`text-xs font-serif italic ${isDay ? 'text-[#634e3f]' : 'text-[#f5deb3]/80'}`}>
           {t.pausedQuote}
         </p>
@@ -58,7 +57,6 @@ export const PauseModal: React.FC<PauseModalProps> = ({
             <Play className="w-4 h-4 fill-current" />
             <span>{t.resumeTurn}</span>
           </button>
-
           <button
             onClick={onRestartTurn}
             className={`flex items-center justify-center space-x-2 py-2.5 border font-serif font-semibold text-xs uppercase tracking-[0.2em] rounded-xl transition-all ${
@@ -70,7 +68,6 @@ export const PauseModal: React.FC<PauseModalProps> = ({
             <RotateCcw className="w-3.5 h-3.5" />
             <span>{t.restartTurn}</span>
           </button>
-
           <button
             onClick={onReturnToMenu}
             className={`flex items-center justify-center space-x-2 py-2.5 border font-serif font-semibold text-xs uppercase tracking-[0.2em] rounded-xl transition-all ${

@@ -97,7 +97,6 @@ export const GospelLoreModal: React.FC<GospelLoreModalProps> = ({ onClose }) => 
             >
               {t.sacredSymbolsTitle}
             </span>
-
             <div
               className={`p-3 border rounded-xl space-y-2 text-[11px] ${
                 isDay
@@ -123,6 +122,74 @@ export const GospelLoreModal: React.FC<GospelLoreModalProps> = ({ onClose }) => 
                 </strong>{' '}
                 {t.symbolVowelsDesc}
               </p>
+            </div>
+          </div>
+
+          {/* Elemental Power-Ups Guide */}
+          <div className="pt-2 space-y-2">
+            <span
+              className={`text-[10px] font-serif font-bold uppercase tracking-[0.25em] block ${
+                isDay ? 'text-[#b8860b]' : 'text-[#d4af37]'
+              }`}
+            >
+              {t.powerupsTitle}
+            </span>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+              <div
+                className={`p-2.5 border rounded-xl flex items-start space-x-2 ${
+                  isDay ? 'bg-[#ede4d4]/80 border-rose-500/30' : 'bg-[#1a140f] border-rose-500/30'
+                }`}
+              >
+                <span className="text-base">🔥</span>
+                <div className="text-[11px] leading-tight">
+                  <span className="font-cinzel font-bold text-rose-500 block">{t.elementFire}</span>
+                  <span className={`text-[10px] ${isDay ? 'text-[#634e3f]' : 'text-[#f5deb3]/80'}`}>
+                    {t.elementFireDesc}
+                  </span>
+                </div>
+              </div>
+
+              <div
+                className={`p-2.5 border rounded-xl flex items-start space-x-2 ${
+                  isDay ? 'bg-[#ede4d4]/80 border-sky-500/30' : 'bg-[#1a140f] border-sky-500/30'
+                }`}
+              >
+                <span className="text-base">💨</span>
+                <div className="text-[11px] leading-tight">
+                  <span className="font-cinzel font-bold text-sky-500 block">{t.elementAir}</span>
+                  <span className={`text-[10px] ${isDay ? 'text-[#634e3f]' : 'text-[#f5deb3]/80'}`}>
+                    {t.elementAirDesc}
+                  </span>
+                </div>
+              </div>
+
+              <div
+                className={`p-2.5 border rounded-xl flex items-start space-x-2 ${
+                  isDay ? 'bg-[#ede4d4]/80 border-blue-500/30' : 'bg-[#1a140f] border-blue-500/30'
+                }`}
+              >
+                <span className="text-base">💧</span>
+                <div className="text-[11px] leading-tight">
+                  <span className="font-cinzel font-bold text-blue-500 block">{t.elementWater}</span>
+                  <span className={`text-[10px] ${isDay ? 'text-[#634e3f]' : 'text-[#f5deb3]/80'}`}>
+                    {t.elementWaterDesc}
+                  </span>
+                </div>
+              </div>
+
+              <div
+                className={`p-2.5 border rounded-xl flex items-start space-x-2 ${
+                  isDay ? 'bg-[#ede4d4]/80 border-emerald-500/30' : 'bg-[#1a140f] border-emerald-500/30'
+                }`}
+              >
+                <span className="text-base">🛡️</span>
+                <div className="text-[11px] leading-tight">
+                  <span className="font-cinzel font-bold text-emerald-500 block">{t.elementEarth}</span>
+                  <span className={`text-[10px] ${isDay ? 'text-[#634e3f]' : 'text-[#f5deb3]/80'}`}>
+                    {t.elementEarthDesc}
+                  </span>
+                </div>
+              </div>
             </div>
           </div>
         </div>
