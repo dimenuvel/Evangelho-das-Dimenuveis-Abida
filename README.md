@@ -6,10 +6,10 @@ https://github.com/dimenuvel/Evangelho-das-Dimenuveis-Abida/releases/tag/v1.2
 [![Version](https://img.shields.io/badge/version-1.2.0-gold.svg)](./package.json)
 [![License: MIT](https://img.shields.io/badge/License-MIT-amber.svg)](./LICENSE)
 
-> *"Permanece, reconhece as camadas, atravessa-as e retorna ao centro."*  
+> *"Permanece, reconhece as Dimenúveis, atravessa-as e retorna ao centro."*  
 > — *Do Evangelho das Dimenuíveis*
 
-**Abida - O Jogo** é um brick-breaker arcade cósmico e meditativo, construído com **React**, **HTML5 Canvas**, **Tailwind CSS** e a **Web Audio API**. Combinando mecânicas clássicas de arcade com uma mitologia espiritual, pinos de boliche cósmicos, ondas de choque a laser que atravessam camadas, power-ups elementais e a sequência harmônica de vogais (`I-E-O-U-A`), o jogo conduz os jogadores em uma jornada mística para transcender as camadas da existência e alcançar o Núcleo Dourado.
+**Abida - O Jogo** é um brick-breaker arcade cósmico e meditativo, construído com **React**, **HTML5 Canvas**, **Tailwind CSS** e a **Web Audio API**. Combinando mecânicas clássicas de arcade com uma mitologia espiritual, pinos de boliche cósmicos, ondas de choque a laser que atravessam Dimenúveis, power-ups elementais e a sequência harmônica de vogais (`I-E-O-U-A`), o jogo conduz os jogadores em uma jornada mística para transcender as Dimenúveis da existência e alcançar o Núcleo Dourado.
 
 ---
 
