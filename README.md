@@ -1,5 +1,8 @@
 # Abide — The Game 🎳✨ `v1.2`
 
+https://github.com/dimenuvel/Evangelho-das-Dimenuveis-Abida/releases/tag/v1.2
+
+
 [![Version](https://img.shields.io/badge/version-1.2.0-gold.svg)](./package.json)
 [![License: MIT](https://img.shields.io/badge/License-MIT-amber.svg)](./LICENSE)
 
