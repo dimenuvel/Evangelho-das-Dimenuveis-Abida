@@ -140,15 +140,6 @@ export const MainMenu: React.FC<MainMenuProps> = ({
           </button>
 
           <div className="flex items-center space-x-2">
-            <span
-              className={`text-[9.5px] font-mono font-bold px-2 py-0.5 rounded-full border transition-all ${
-                isDay
-                  ? 'bg-[#ede4d4]/90 border-[#b8860b]/40 text-[#8c6508] shadow-xs'
-                  : 'bg-[#1a140f]/90 border-[#d4af37]/40 text-[#d4af37] shadow-xs'
-              }`}
-            >
-              v1.2
-            </span>
             <ThemeSelector compact />
             <LanguageSelector compact />
           </div>
@@ -368,18 +359,7 @@ export const MainMenu: React.FC<MainMenuProps> = ({
         }`}
       >
         {/* Controls top bar */}
-        <div className="w-full flex items-center justify-between mb-3">
-          <div className="flex items-center space-x-1.5">
-            <span
-              className={`text-[9.5px] font-mono font-bold px-2.5 py-0.5 rounded-full border transition-all ${
-                isDay
-                  ? 'bg-[#ede4d4]/90 border-[#b8860b]/40 text-[#8c6508] shadow-xs'
-                  : 'bg-[#1a140f]/90 border-[#d4af37]/40 text-[#d4af37] shadow-xs'
-              }`}
-            >
-              v1.2
-            </span>
-          </div>
+        <div className="w-full flex items-center justify-end mb-3">
           <div className="flex items-center space-x-2">
             <ThemeSelector compact />
             <LanguageSelector compact />
@@ -709,8 +689,6 @@ export const MainMenu: React.FC<MainMenuProps> = ({
         }`}
       >
         <span>© {t.subHeader}</span>
-        <span>•</span>
-        <span className="font-mono font-bold tracking-normal px-1.5 py-0.5 rounded border border-current/30 text-[9.5px]">v1.2</span>
         <span>•</span>
         <a
           href={`mailto:samuel.tiem@proton.me?subject=${encodeURIComponent(language === 'pt' ? 'Evangelho das Dimenúveis - Abida' : 'Gospel of the Dimenuous - Abide')}`}
