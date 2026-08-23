@@ -690,6 +690,8 @@ export const MainMenu: React.FC<MainMenuProps> = ({
       >
         <span>© {t.subHeader}</span>
         <span>•</span>
+        <span className="font-mono font-bold tracking-normal px-1.5 py-0.5 rounded border border-current/30 text-[9.5px]">v1.2</span>
+        <span>•</span>
         <a
           href={`mailto:samuel.tiem@proton.me?subject=${encodeURIComponent(language === 'pt' ? 'Evangelho das Dimenúveis - Abida' : 'Gospel of the Dimenuous - Abide')}`}
           className={`hover:underline transition-colors ${
