@@ -1,4 +1,4 @@
-# Abide — The Game 🎳✨ `v1.2`
+# Abida - O Jogo 🎳✨ `v1.2`
 
 https://github.com/dimenuvel/Evangelho-das-Dimenuveis-Abida/releases/tag/v1.2
 
@@ -6,124 +6,124 @@ https://github.com/dimenuvel/Evangelho-das-Dimenuveis-Abida/releases/tag/v1.2
 [![Version](https://img.shields.io/badge/version-1.2.0-gold.svg)](./package.json)
 [![License: MIT](https://img.shields.io/badge/License-MIT-amber.svg)](./LICENSE)
 
-> *"Abide, recognize the layers, cross them, and return to the center."*  
-> — *From the Gospel of Dimenuous*
+> *"Permanece, reconhece as camadas, atravessa-as e retorna ao centro."*  
+> — *Do Evangelho das Dimenuíveis*
 
-**Abide — The Game** is a cosmic, meditative arcade brick-breaker built with **React**, **HTML5 Canvas**, **Tailwind CSS**, and the **Web Audio API**. Combining classic arcade mechanics with spiritual lore, cosmic bowling pins, layer-crossing laser shockwaves, elemental power-ups, and the harmonic vowel sequence (`I-E-O-U-A`), it guides players through a mystical quest to transcend the layers of existence and reach the Golden Core.
-
----
-
-## 🌟 Key Features
-
-### 🌀 10 Cosmic Turns & Turn X Golden Core
-1. **Turn 1: The Cosmic Bowling Alley** — Classic brick formations with sacred bowling pin targets.
-2. **Turn 2: The Sacred Rug** — Intricate tapestry formations and high-value strike opportunities.
-3. **Turn 3: Earth Element** — Dense emerald barriers and fortified defensive blocks.
-4. **Turn 4: Water Element** — Fluid azure currents and paddle-expanding harmonic drops.
-5. **Turn 5: Fire Element** — High-velocity blazing orbs and energized speed trials.
-6. **Turn 6: Air Element** — Weightless physics, elusive gusts, and shifting obstacles.
-7. **Turn 7: The Void** — Illusions, inverted cosmic controls, and mystery blocks.
-8. **Turn 8: The Sacred Vowels (`I-E-O-U-A`)** — Hit vowel runes in harmonic succession for celestial multiplier rewards.
-9. **Turn 9: The Mind Matrix** — Multi-orb flow states and dense geometric layers.
-10. **Turn X: Return to the Center** — Radial orbital shields protecting the central Golden Core. Pierce all rings and strike the core to achieve transcendence.
-
-### 🎮 Game Modes
-- **Classic Campaign (10 Turns)**: Full narrative arc featuring philosophical cutscenes between *The Dude*, *The Disciple*, and *The Stranger*.
-- **Endless Wave Mode**: Progressively challenging procedural waves with scaling modifiers, wave clear bonuses, and high score tracking.
-- **Daily Cosmic Challenge**: Deterministic daily seeded layouts (Mandala, Temple, Labyrinth, Vortex, Diamond) with special modifiers (Void Mystery, Fast Orbs, Shielded Core) and daily streak tracking.
-
-### ⚡ Game Mechanics & Visual FX
-- **Sacred Layer Crossing**: Breaking the last brick in any layer triggers screen-shake feedback, resonant audio cues, a horizontal golden laser beam, and radiant shockwave bursts.
-- **The Abide Meter**: Maintain flow and steady paddle movement to charge the meter. Activate **Abide Mode** for temporary invulnerability, expanded paddle width, 2x multiplier, and celestial particle trails.
-- **Harmonic Vowel System**: Strike `I → E → O → U → A` in sequence to trigger cosmic chants and massive point surges.
-- **Haptic & Visual FX**: Multi-shape particle bursts (stars `✦`, halo rings, glowing orbs), shockwave rings, and screen-shake dynamics.
-
-### 🧘 Meditation & Sound Lab
-- **Interactive Sound Lab**: Real-time Web Audio synthesizer console with adjustable frequencies, binaural ambient drones, harmonic intervals, and SFX test pads.
-- **Meditate Mode**: Guided breath-pacer and soothing generative ambient soundscapes.
-
-### 🌍 Accessibility & Customization
-- **Bilingual**: Seamless instant switching between **English (EN)** and **Portuguese (PT-BR)**.
-- **Themes**: **Day Mode (Serene Warm Linen)** & **Night Mode (Deep Obsidian Void)**.
-- **Audio & Haptics**: Dedicated volume controls, mute toggles, and vibration feedback switches.
+**Abide — The Game** é um brick-breaker arcade cósmico e meditativo, construído com **React**, **HTML5 Canvas**, **Tailwind CSS** e a **Web Audio API**. Combinando mecânicas clássicas de arcade com uma mitologia espiritual, pinos de boliche cósmicos, ondas de choque a laser que atravessam camadas, power-ups elementais e a sequência harmônica de vogais (`I-E-O-U-A`), o jogo conduz os jogadores em uma jornada mística para transcender as camadas da existência e alcançar o Núcleo Dourado.
 
 ---
 
-## 🛠️ Tech Stack
+## 🌟 Principais Recursos
+
+### 🌀 10 Turnos Cósmicos e o Turno X — Núcleo Dourado
+1. **Turno 1: O Salão de Boliche Cósmico** — Formações clássicas de blocos com pinos de boliche sagrados como alvos.
+2. **Turno 2: O Tapete Sagrado** — Formações intrincadas em tapeçaria e oportunidades de strike de alto valor.
+3. **Turno 3: Elemento Terra** — Barreiras densas em esmeralda e blocos defensivos fortificados.
+4. **Turno 4: Elemento Água** — Correntes fluidas em azul e drops harmônicos que expandem a raquete.
+5. **Turno 5: Elemento Fogo** — Orbes flamejantes de alta velocidade e desafios de velocidade energizados.
+6. **Turno 6: Elemento Ar** — Física sem peso, rajadas evasivas e obstáculos em constante mudança.
+7. **Turno 7: O Vazio** — Ilusões, controles cósmicos invertidos e blocos misteriosos.
+8. **Turno 8: As Vogais Sagradas (`I-E-O-U-A`)** — Acerte as runas de vogais em sucessão harmônica para recompensas de multiplicador celestial.
+9. **Turno 9: A Matriz da Mente** — Estados de fluxo com múltiplos orbes e camadas geométricas densas.
+10. **Turno X: Retorno ao Centro** — Escudos orbitais radiais protegendo o Núcleo Dourado central. Atravesse todos os anéis e atinja o núcleo para alcançar a transcendência.
+
+### 🎮 Modos de Jogo
+- **Campanha Clássica (10 Turnos)**: Arco narrativo completo com cutscenes filosóficas entre *O Cara*, *O Discípulo* e *O Estranho*.
+- **Modo Ondas Infinitas**: Ondas procedurais com dificuldade progressiva, modificadores escalonáveis, bônus de limpeza de onda e registro de pontuação máxima.
+- **Desafio Cósmico Diário**: Layouts diários determinísticos e gerados por semente (Mandala, Templo, Labirinto, Vórtice, Diamante), com modificadores especiais (Mistério do Vazio, Orbes Rápidos, Núcleo Blindado) e acompanhamento de sequência diária.
+
+### ⚡ Mecânicas de Jogo e Efeitos Visuais
+- **Travessia de Camada Sagrada**: Destruir o último bloco de qualquer camada dispara feedback de tremor de tela, sinais sonoros ressonantes, um feixe de laser dourado horizontal e explosões radiantes de onda de choque.
+- **O Medidor de Permanência (Abide Meter)**: Mantenha o fluxo e o movimento constante da raquete para carregar o medidor. Ative o **Modo Abide** para invulnerabilidade temporária, largura de raquete expandida, multiplicador 2x e rastros de partículas celestiais.
+- **Sistema Harmônico de Vogais**: Acerte `I → E → O → U → A` em sequência para disparar cânticos cósmicos e grandes surtos de pontuação.
+- **Efeitos Hápticos e Visuais**: Explosões de partículas em múltiplos formatos (estrelas `✦`, anéis de halo, orbes brilhantes), anéis de onda de choque e dinâmicas de tremor de tela.
+
+### 🧘 Meditação e Laboratório Sonoro
+- **Laboratório Sonoro Interativo**: Console sintetizador em tempo real via Web Audio, com frequências ajustáveis, drones ambientes binaurais, intervalos harmônicos e pads de teste de efeitos sonoros.
+- **Modo Meditar**: Guia de respiração ritmada e paisagens sonoras ambientes generativas e relaxantes.
+
+### 🌍 Acessibilidade e Personalização
+- **Bilíngue**: Alternância instantânea e fluida entre **Inglês (EN)** e **Português (PT-BR)**.
+- **Temas**: **Modo Dia (Linho Quente Sereno)** e **Modo Noite (Vazio Obsidiana Profundo)**.
+- **Áudio e Hápticos**: Controles de volume dedicados, alternância de mudo e interruptores de feedback por vibração.
+
+---
+
+## 🛠️ Stack Tecnológica
 
 - **Framework**: [React 19](https://react.dev/) + [Vite](https://vitejs.dev/)
-- **Language**: [TypeScript](https://www.typescriptlang.org/)
-- **Graphics / Engine**: HTML5 Canvas with custom 60 FPS physics, elastic collision resolution, particle emitter, and screen-shake system
-- **Audio Engine**: Pure [Web Audio API](https://developer.mozilla.org/en-US/docs/Web/API/Web_Audio_API) (Subtractive synths, polyphonic oscillators, ambient drones, harmonic resonance)
-- **Styling**: [Tailwind CSS v4](https://tailwindcss.com/), [Lucide React Icons](https://lucide.dev/), [Motion](https://motion.dev/)
-- **Typography**: Cinzel, Playfair Display, JetBrains Mono
+- **Linguagem**: [TypeScript](https://www.typescriptlang.org/)
+- **Gráficos / Engine**: HTML5 Canvas com física personalizada a 60 FPS, resolução de colisão elástica, emissor de partículas e sistema de tremor de tela
+- **Motor de Áudio**: [Web Audio API](https://developer.mozilla.org/en-US/docs/Web/API/Web_Audio_API) pura (síntese subtrativa, osciladores polifônicos, drones ambientes, ressonância harmônica)
+- **Estilização**: [Tailwind CSS v4](https://tailwindcss.com/), [Lucide React Icons](https://lucide.dev/), [Motion](https://motion.dev/)
+- **Tipografia**: Cinzel, Playfair Display, JetBrains Mono
 
 ---
 
-## 🚀 Getting Started
+## 🚀 Primeiros Passos
 
-### Prerequisites
-- [Node.js](https://nodejs.org/) (version 18.0 or higher recommended)
-- `npm`, `pnpm`, or `yarn`
+### Pré-requisitos
+- [Node.js](https://nodejs.org/) (versão 18.0 ou superior recomendada)
+- `npm`, `pnpm` ou `yarn`
 
-### Installation & Setup
+### Instalação e Configuração
 
-1. **Clone the repository**:
+1. **Clone o repositório**:
    ```bash
    git clone https://github.com/your-username/abide-the-game.git
    cd abide-the-game
    ```
 
-2. **Install dependencies**:
+2. **Instale as dependências**:
    ```bash
    npm install
    ```
 
-3. **Start the local development server**:
+3. **Inicie o servidor de desenvolvimento local**:
    ```bash
    npm run dev
    ```
 
-4. **Open in your browser**:
-   Navigate to [http://localhost:3000](http://localhost:3000) (or the port indicated in your terminal).
+4. **Abra no navegador**:
+   Acesse [http://localhost:3000](http://localhost:3000) (ou a porta indicada no seu terminal).
 
-### Available Scripts
+### Scripts Disponíveis
 
-- `npm run dev` — Starts the development server on port 3000.
-- `npm run build` — Builds the production distribution bundle in `dist/`.
-- `npm run preview` — Locally previews the production build.
-- `npm run lint` — Runs TypeScript compiler checks (`tsc --noEmit`).
-- `npm run cap:build` — Builds web assets and syncs with the Capacitor Android project.
-- `npm run cap:open` — Opens the native Android project in Android Studio.
+- `npm run dev` — Inicia o servidor de desenvolvimento na porta 3000.
+- `npm run build` — Gera o pacote de distribuição de produção em `dist/`.
+- `npm run preview` — Pré-visualiza localmente o build de produção.
+- `npm run lint` — Executa verificações do compilador TypeScript (`tsc --noEmit`).
+- `npm run cap:build` — Compila os recursos web e sincroniza com o projeto Android do Capacitor.
+- `npm run cap:open` — Abre o projeto nativo Android no Android Studio.
 
 ---
 
-## 📱 Android APK & GitHub Actions Workflow
+## 📱 APK Android e Workflow do GitHub Actions
 
-This project is packaged with **Capacitor 8** for Android:
+Este projeto é empacotado com **Capacitor 8** para Android:
 
-- **Automated CI/CD Workflow**: Located at [`.github/workflows/build-apk.yml`](./.github/workflows/build-apk.yml).
-- **Environment & Dependencies**:
+- **Workflow Automatizado de CI/CD**: Localizado em [`.github/workflows/build-apk.yml`](./.github/workflows/build-apk.yml).
+- **Ambiente e Dependências**:
   - **Java**: JDK 21 (Temurin)
   - **Android SDK & Build Tools**: API 34+ / 35
   - **Node.js**: 24 LTS
-  - **Gradle Wrapper**: Automated caching via `gradle/actions/setup-gradle@v4`
-- **Output Artifacts**: Generates installable `Abida-O-Jogo.apk` and release APK artifacts automatically upon commits, PRs, version tags (`v*`), or manual `workflow_dispatch` trigger.
-- **Spiral App Icon Set**: Full mipmap icon suite in `resources/android/` (`mdpi`, `hdpi`, `xhdpi`, `xxhdpi`, `xxxhdpi`) including square, round (`ic_launcher_round`), adaptive foreground (`ic_launcher_foreground`), and background layers featuring the golden sacred Fibonacci spiral.
+  - **Gradle Wrapper**: Cache automatizado via `gradle/actions/setup-gradle@v4`
+- **Artefatos Gerados**: Gera automaticamente o `Abida-O-Jogo.apk` instalável e artefatos de APK de release a cada commit, PR, tag de versão (`v*`) ou disparo manual via `workflow_dispatch`.
+- **Conjunto de Ícones em Espiral**: Suíte completa de ícones mipmap em `resources/android/` (`mdpi`, `hdpi`, `xhdpi`, `xxhdpi`, `xxxhdpi`), incluindo versões quadrada, redonda (`ic_launcher_round`), adaptativa em primeiro plano (`ic_launcher_foreground`) e camadas de fundo com a espiral sagrada dourada de Fibonacci.
 
 ---
 
-## 🕹️ Controls
+## 🕹️ Controles
 
-| Action | Mouse / Touch | Keyboard |
+| Ação | Mouse / Toque | Teclado |
 | :--- | :--- | :--- |
-| **Move Paddle** | Move cursor / drag finger horizontally | Left / Right Arrow or `A` / `D` |
-| **Launch Orb** | Click / Tap canvas | `Spacebar` / `Up Arrow` / `W` |
-| **Activate Abide Mode** | Tap Abide button when charged | `Enter` / `E` |
-| **Pause / Resume** | Tap Pause button | `Escape` / `P` |
+| **Mover Raquete** | Mover o cursor / arrastar o dedo horizontalmente | Seta Esquerda / Direita ou `A` / `D` |
+| **Lançar Orbe** | Clicar / Tocar na tela | `Barra de Espaço` / Seta Cima / `W` |
+| **Ativar Modo Abide** | Tocar no botão Abide quando carregado | `Enter` / `E` |
+| **Pausar / Retomar** | Tocar no botão Pausar | `Esc` / `P` |
 
 ---
 
-## 📄 License
+## 📄 Licença
 
-Distributed under the **MIT License**. See [`LICENSE`](./LICENSE) for more information.
+Distribuído sob a **Licença MIT**. Veja [`LICENSE`](./LICENSE) para mais informações.
