@@ -386,15 +386,6 @@ export const MainMenu: React.FC<MainMenuProps> = ({
           </div>
         </div>
 
-        <div className="flex flex-col items-center mb-1">
-          <img
-            src="/icon.png"
-            alt="Abide Spiral Emblem"
-            referrerPolicy="no-referrer"
-            className="w-14 h-14 sm:w-16 sm:h-16 rounded-2xl border-2 border-amber-500/40 shadow-[0_0_20px_rgba(212,175,55,0.35)] object-cover hover:scale-105 transition-transform duration-300"
-          />
-        </div>
-
         <h1
           className={`text-2xl sm:text-3xl md:text-4xl font-cinzel font-light tracking-[0.15em] sm:tracking-[0.3em] uppercase break-words max-w-full px-2 ${
             isDay
