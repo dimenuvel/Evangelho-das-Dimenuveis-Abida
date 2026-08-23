@@ -332,14 +332,14 @@ export const TourModal: React.FC<TourModalProps> = ({ onClose }) => {
             <button
               onClick={handleSkip}
               type="button"
-              className={`flex items-center space-x-1 border rounded-lg px-2 py-1 text-xs font-cinzel font-bold tracking-wider uppercase transition-all active:scale-95 cursor-pointer ${
+              className={`flex items-center justify-center border rounded-lg px-2 py-1 text-xs font-cinzel font-bold transition-all active:scale-95 cursor-pointer ${
                 isDay
-                  ? 'bg-[#ede4d4] border-[#b8860b]/30 text-[#8c6508] hover:bg-[#b8860b]/20'
+                  ? 'bg-[#ede4d4] border-[#b8860b]/30 text-[#2c2017] hover:bg-[#b8860b]/20'
                   : 'bg-[#1a140f] border-[#d4af37]/30 text-[#d4af37] hover:bg-[#d4af37]/20 shadow-[0_0_8px_rgba(212,175,55,0.2)]'
               }`}
-              title={t.skipTour}
+              title={language === 'pt' ? 'Pular' : 'Skip'}
             >
-              <span className="text-[10px] uppercase">{t.skipTour}</span>
+              <span className="text-[10px] tracking-wider uppercase leading-none">{t.skipTour}</span>
             </button>
           </div>
         </div>

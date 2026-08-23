@@ -10,7 +10,7 @@ export const MAIN_PAGE_QUOTES: QuoteItem[] = [
   {
     id: 1,
     en: '"Just let it roll, man. The Rug abides."',
-    pt: '"Apenas deixe rolar, cara. O Tapete abida."'
+    pt: '"Apenas deixe rolar, mano. O Tapete abida."'
   },
   {
     id: 2,
@@ -80,7 +80,7 @@ export const MAIN_PAGE_QUOTES: QuoteItem[] = [
   {
     id: 15,
     en: '"There\'s no rush in the Spiral, man. Take your time."',
-    pt: '"Não há pressa na Espiral, cara. Siga no seu tempo."'
+    pt: '"Não há pressa na Espiral, mano. Siga no seu tempo."'
   },
   {
     id: 16,

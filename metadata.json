@@ -1,6 +1,6 @@
 {
-  "name": "ABIDE — THE TEN TURNS",
-  "description": "A Breakout game from The Gospel of the Dimenuous — abide, recognize the layers, cross them, and return to center.",
+  "name": "Abide - The Game",
+  "description": "A Breakout game from Gospel of Dimenuous - abide, recognize the layers, cross them, and return to center.",
   "requestFramePermissions": [],
   "majorCapabilities": [
     "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"

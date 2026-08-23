@@ -1,5 +1,5 @@
 /**
- * Web Audio API Procedural Sound Engine for ABIDE — THE TEN TURNS
+ * Web Audio API Procedural Sound Engine for Abida - O Jogo
  * High-fidelity, subtle, atmospheric soundscapes for all 10 Turns,
  * IEOUA vowel formant synthesis, dynamic sequence modulation, and gameplay FX.
  */
@@ -51,7 +51,6 @@ class SoundEngine {
       // Ambient Drone Bus
       this.ambientGain = this.ctx.createGain();
       this.ambientGain.gain.setValueAtTime(0.18, this.ctx.currentTime);
-
       this.ambientFilter = this.ctx.createBiquadFilter();
       this.ambientFilter.type = 'lowpass';
       this.ambientFilter.frequency.setValueAtTime(1000, this.ctx.currentTime);
@@ -104,12 +103,12 @@ class SoundEngine {
   public playPaddleHit(velocityRatio: number = 1.0) {
     if (this.isMuted || !this.ctx || !this.masterGain) return;
     this.resume();
-
     const now = this.ctx.currentTime;
+
     const osc = this.ctx.createOscillator();
     const gain = this.ctx.createGain();
-
     osc.type = 'sine';
+
     // Deep warm rug thud + golden chime
     osc.frequency.setValueAtTime(130 + velocityRatio * 45, now);
     osc.frequency.exponentialRampToValueAtTime(65, now + 0.2);
@@ -129,6 +128,7 @@ class SoundEngine {
     chime.type = 'triangle';
     chime.frequency.setValueAtTime(523.25, now); // C5
     chime.frequency.exponentialRampToValueAtTime(261.63, now + 0.25);
+
     chimeGain.gain.setValueAtTime(0.08, now);
     chimeGain.gain.exponentialRampToValueAtTime(0.001, now + 0.25);
 
@@ -143,8 +143,8 @@ class SoundEngine {
   public playBlockHit(pitchMultiplier: number = 1.0) {
     if (this.isMuted || !this.ctx || !this.masterGain) return;
     this.resume();
-
     const now = this.ctx.currentTime;
+
     const osc = this.ctx.createOscillator();
     const gain = this.ctx.createGain();
 
@@ -170,7 +170,6 @@ class SoundEngine {
   public playPinStrike() {
     if (this.isMuted || !this.ctx || !this.masterGain) return;
     this.resume();
-
     const now = this.ctx.currentTime;
 
     // Pin crash noise + golden bells
@@ -207,6 +206,7 @@ class SoundEngine {
       osc.type = 'triangle';
       osc.frequency.setValueAtTime(freq, now + idx * 0.02);
       osc.frequency.exponentialRampToValueAtTime(freq * 0.5, now + 0.4);
+
       gain.gain.setValueAtTime(0.12, now + idx * 0.02);
       gain.gain.exponentialRampToValueAtTime(0.001, now + 0.4);
 
@@ -222,7 +222,6 @@ class SoundEngine {
   public playIEOUAVowel(vowel: Vowel, stepIndex?: number) {
     if (this.isMuted || !this.ctx || !this.masterGain) return;
     this.resume();
-
     const now = this.ctx.currentTime;
 
     const vowelConfigs: Record<Vowel, { f1: number; f2: number; base: number }> = {
@@ -238,7 +237,6 @@ class SoundEngine {
     // Dual-formant vocal synth
     const osc = this.ctx.createOscillator();
     const gain = this.ctx.createGain();
-
     osc.type = 'sawtooth';
     osc.frequency.setValueAtTime(config.base, now);
 
@@ -274,12 +272,10 @@ class SoundEngine {
   public setIEOUAProgress(progress: number) {
     this.ieouaProgress = Math.max(0, Math.min(5, progress));
     if (!this.ctx || !this.ambientFilter) return;
-
     const now = this.ctx.currentTime;
     // As sequence advances (0 -> 5), filter cutoff opens smoothly and adds golden brightness
     const baseCutoff = 600 + this.currentTurnId * 80;
     const targetCutoff = baseCutoff + this.ieouaProgress * 300;
-
     this.ambientFilter.frequency.setTargetAtTime(targetCutoff, now, 0.3);
   }
 
@@ -287,8 +283,8 @@ class SoundEngine {
   public playIEOUASequenceComplete() {
     if (this.isMuted || !this.ctx || !this.masterGain) return;
     this.resume();
-
     const now = this.ctx.currentTime;
+
     const vowelFreqs = [220, 329.63, 440, 523.25, 659.25]; // U, O, E, I, A pentatonic cascade
 
     // Arpeggiated cascade
@@ -296,7 +292,6 @@ class SoundEngine {
       if (!this.ctx || !this.masterGain) return;
       const osc = this.ctx.createOscillator();
       const gain = this.ctx.createGain();
-
       osc.type = 'triangle';
       osc.frequency.setValueAtTime(freq, now + idx * 0.08);
 
@@ -330,12 +325,12 @@ class SoundEngine {
   public playPowerUp(type: string) {
     if (this.isMuted || !this.ctx || !this.masterGain) return;
     this.resume();
-
     const now = this.ctx.currentTime;
+
     const osc = this.ctx.createOscillator();
     const gain = this.ctx.createGain();
-
     osc.type = 'sine';
+
     const startFreq = type === 'FIRE' ? 320 : type === 'AIR' ? 640 : type === 'WATER' ? 420 : 210;
     osc.frequency.setValueAtTime(startFreq, now);
     osc.frequency.exponentialRampToValueAtTime(startFreq * 2.2, now + 0.3);
@@ -354,15 +349,13 @@ class SoundEngine {
   public playAbideActivation() {
     if (this.isMuted || !this.ctx || !this.masterGain) return;
     this.resume();
-
     const now = this.ctx.currentTime;
-    const chord = [216, 432, 528, 639, 852]; // Solfeggio meditative frequencies
 
+    const chord = [216, 432, 528, 639, 852]; // Solfeggio meditative frequencies
     chord.forEach((freq) => {
       if (!this.ctx || !this.masterGain) return;
       const osc = this.ctx.createOscillator();
       const gain = this.ctx.createGain();
-
       osc.type = 'sine';
       osc.frequency.setValueAtTime(freq, now);
 
@@ -382,11 +375,10 @@ class SoundEngine {
   public playVoidTrigger() {
     if (this.isMuted || !this.ctx || !this.masterGain) return;
     this.resume();
-
     const now = this.ctx.currentTime;
+
     const osc = this.ctx.createOscillator();
     const gain = this.ctx.createGain();
-
     osc.type = 'sawtooth';
     osc.frequency.setValueAtTime(180, now);
     osc.frequency.linearRampToValueAtTime(80, now + 0.35);
@@ -405,11 +397,10 @@ class SoundEngine {
   public playBallLost() {
     if (this.isMuted || !this.ctx || !this.masterGain) return;
     this.resume();
-
     const now = this.ctx.currentTime;
+
     const osc = this.ctx.createOscillator();
     const gain = this.ctx.createGain();
-
     osc.type = 'sine';
     osc.frequency.setValueAtTime(216, now);
     osc.frequency.exponentialRampToValueAtTime(54, now + 0.45);
@@ -424,13 +415,11 @@ class SoundEngine {
     osc.stop(now + 0.45);
   }
 
-
   // --- PROCEDURAL AMBIENT SOUNDSCAPES FOR THE TEN TURNS --- //
 
   public startAmbientDrone(turnId: number) {
     if (this.currentTurnId === turnId && this.activeNodes.length > 0) return;
     this.stopAmbientDrone();
-
     this.resume();
     if (!this.ctx || !this.ambientGain) return;
 
@@ -493,37 +482,29 @@ class SoundEngine {
   }
 
   // TURN I: SILENCE ("THE MIRROR OF THE MIND")
-  // Deep, quiet, near-inaudible crystalline sine drone with gentle glass-like micro-tones and soft breath
   private createTurn1Silence(now: number) {
     if (!this.ctx || !this.ambientGain) return;
-
     const freqs = [108, 216, 432];
     freqs.forEach((freq, idx) => {
       if (!this.ctx || !this.ambientGain) return;
       const osc = this.ctx.createOscillator();
       const gain = this.ctx.createGain();
-
       osc.type = 'sine';
       osc.frequency.setValueAtTime(freq + (idx === 2 ? 0.5 : 0), now);
-
       gain.gain.setValueAtTime(0.001, now);
       gain.gain.linearRampToValueAtTime(0.05 / (idx + 1), now + 2.0);
-
       osc.connect(gain);
       gain.connect(this.ambientGain);
-
       osc.start(now);
       this.activeNodes.push(osc);
     });
 
-    // Slow breath-like lowpass white noise swell
     const bufferSize = this.ctx.sampleRate * 2;
     const buffer = this.ctx.createBuffer(1, bufferSize, this.ctx.sampleRate);
     const data = buffer.getChannelData(0);
     for (let i = 0; i < bufferSize; i++) {
       data[i] = (Math.random() * 2 - 1) * 0.02;
     }
-
     const noise = this.ctx.createBufferSource();
     noise.buffer = buffer;
     noise.loop = true;
@@ -535,7 +516,6 @@ class SoundEngine {
     const noiseGain = this.ctx.createGain();
     noiseGain.gain.setValueAtTime(0.02, now);
 
-    // LFO to swell noise like slow breathing
     const lfo = this.ctx.createOscillator();
     lfo.frequency.setValueAtTime(0.1, now); // 10 second breath cycle
     const lfoGain = this.ctx.createGain();
@@ -555,81 +535,64 @@ class SoundEngine {
   }
 
   // TURN II: VISION ("THE EYE THAT SEES")
-  // Shimmering twin dual-pitch drone with filter sweep (opening like an eye) and eerie high-frequency whispers
   private createTurn2Vision(now: number) {
     if (!this.ctx || !this.ambientGain) return;
-
     const freqs = [128, 256, 384];
     freqs.forEach((freq) => {
       if (!this.ctx || !this.ambientGain) return;
       const osc = this.ctx.createOscillator();
       const gain = this.ctx.createGain();
-
       osc.type = 'triangle';
       osc.frequency.setValueAtTime(freq, now);
 
-      // Pitch vibrato LFO
       const lfo = this.ctx.createOscillator();
       lfo.frequency.setValueAtTime(0.4, now);
       const lfoGain = this.ctx.createGain();
       lfoGain.gain.setValueAtTime(1.5, now);
-
       lfo.connect(lfoGain);
       lfoGain.connect(osc.frequency);
 
       gain.gain.setValueAtTime(0.001, now);
       gain.gain.linearRampToValueAtTime(0.04, now + 1.5);
-
       osc.connect(gain);
       gain.connect(this.ambientGain);
-
       osc.start(now);
       lfo.start(now);
       this.activeNodes.push(osc);
       this.activeLfos.push(lfo);
     });
 
-    // High eye-whisper glass tone (768Hz)
     const eyeOsc = this.ctx.createOscillator();
     const eyeGain = this.ctx.createGain();
     eyeOsc.type = 'sine';
     eyeOsc.frequency.setValueAtTime(768, now);
-
     eyeGain.gain.setValueAtTime(0.001, now);
     eyeGain.gain.linearRampToValueAtTime(0.015, now + 3.0);
-
     eyeOsc.connect(eyeGain);
     eyeGain.connect(this.ambientGain);
-
     eyeOsc.start(now);
     this.activeNodes.push(eyeOsc);
   }
 
   // TURN III: ENERGY ("THE FLOW OF ENERGY")
-  // Pulsing rhythmic sub-bass LFO drone (~120 BPM tempo pulse) with energetic harmonic syncopation
   private createTurn3Energy(now: number) {
     if (!this.ctx || !this.ambientGain) return;
-
     const osc = this.ctx.createOscillator();
     const subOsc = this.ctx.createOscillator();
     const gain = this.ctx.createGain();
 
     osc.type = 'sawtooth';
     osc.frequency.setValueAtTime(144, now);
-
     subOsc.type = 'sine';
     subOsc.frequency.setValueAtTime(72, now);
 
-    // 120 BPM Pulse LFO (2 Hz)
     const lfo = this.ctx.createOscillator();
     lfo.type = 'sine';
     lfo.frequency.setValueAtTime(2.0, now);
-
     const lfoGain = this.ctx.createGain();
     lfoGain.gain.setValueAtTime(0.035, now);
 
     gain.gain.setValueAtTime(0.03, now);
-
     lfo.connect(lfoGain);
     lfoGain.connect(gain.gain);
 
@@ -640,82 +603,63 @@ class SoundEngine {
     osc.start(now);
     subOsc.start(now);
     lfo.start(now);
-
     this.activeNodes.push(osc, subOsc);
     this.activeLfos.push(lfo);
   }
 
   // TURN IV: HEART ("THE HEART THAT CONNECTS")
-  // Warm organ-like triad chord drone (Fmaj7) with a slow 60 BPM "heartbeat" pulse
   private createTurn4Heart(now: number) {
     if (!this.ctx || !this.ambientGain) return;
-
     const fMaj7 = [174.61, 220.00, 261.63, 329.63]; // F3, A3, C4, E4
     fMaj7.forEach((freq) => {
       if (!this.ctx || !this.ambientGain) return;
       const osc = this.ctx.createOscillator();
       const gain = this.ctx.createGain();
-
       osc.type = 'sine';
       osc.frequency.setValueAtTime(freq, now);
-
       gain.gain.setValueAtTime(0.001, now);
       gain.gain.linearRampToValueAtTime(0.03, now + 2.0);
-
       osc.connect(gain);
       gain.connect(this.ambientGain);
-
       osc.start(now);
       this.activeNodes.push(osc);
     });
 
-    // 60 BPM Heartbeat low-pass filter pulse LFO (1.0 Hz)
     const heartLfo = this.ctx.createOscillator();
     heartLfo.frequency.setValueAtTime(1.0, now);
     const heartGain = this.ctx.createGain();
     heartGain.gain.setValueAtTime(0.02, now);
-
     heartLfo.connect(heartGain);
     if (this.ambientGain) {
       heartGain.connect(this.ambientGain.gain);
     }
-
     heartLfo.start(now);
     this.activeLfos.push(heartLfo);
   }
 
   // TURN V: WILL ("THE WILL THAT CHOOSES")
-  // Firm, steady low saw-filtered fifth drone with driving steady focus
   private createTurn5Will(now: number) {
     if (!this.ctx || !this.ambientGain) return;
-
     const root = 162; // E3
     const fifth = 243; // B3
-
     [root, fifth].forEach((freq) => {
       if (!this.ctx || !this.ambientGain) return;
       const osc = this.ctx.createOscillator();
       const gain = this.ctx.createGain();
-
       osc.type = 'sawtooth';
       osc.frequency.setValueAtTime(freq, now);
-
       gain.gain.setValueAtTime(0.001, now);
       gain.gain.linearRampToValueAtTime(0.025, now + 1.5);
-
       osc.connect(gain);
       gain.connect(this.ambientGain);
-
       osc.start(now);
       this.activeNodes.push(osc);
     });
   }
 
   // TURN VI: MATTER / ELEMENTAL FIELD ("THE ELEMENTAL FIELD")
-  // Four-part elemental texture: Fire crackle, Air wind sweep, Water liquid pitch wave, Earth sub drone
   private createTurn6Matter(now: number) {
     if (!this.ctx || !this.ambientGain) return;
-
     // 1. Earth: Deep sub drone (54Hz & 108Hz)
     const earthSub = this.ctx.createOscillator();
     const earthGain = this.ctx.createGain();
@@ -732,19 +676,15 @@ class SoundEngine {
     const waterGain = this.ctx.createGain();
     waterOsc.type = 'sine';
     waterOsc.frequency.setValueAtTime(216, now);
-
     const waterLfo = this.ctx.createOscillator();
     waterLfo.frequency.setValueAtTime(3.5, now);
     const waterLfoGain = this.ctx.createGain();
     waterLfoGain.gain.setValueAtTime(4.0, now);
-
     waterLfo.connect(waterLfoGain);
     waterLfoGain.connect(waterOsc.frequency);
-
     waterGain.gain.setValueAtTime(0.03, now);
     waterOsc.connect(waterGain);
     waterGain.connect(this.ambientGain);
-
     waterOsc.start(now);
     waterLfo.start(now);
     this.activeNodes.push(waterOsc);
@@ -756,7 +696,6 @@ class SoundEngine {
     airOsc.type = 'triangle';
     airOsc.frequency.setValueAtTime(432, now);
     airGain.gain.setValueAtTime(0.02, now);
-
     airOsc.connect(airGain);
     airGain.connect(this.ambientGain);
     airOsc.start(now);
@@ -764,73 +703,55 @@ class SoundEngine {
   }
 
   // TURN VII: VOID ("THE VOID")
-  // Detuned dissonant microtonal cluster drone with slow flanging/phaser filter sweeps
   private createTurn7Void(now: number) {
     if (!this.ctx || !this.ambientGain) return;
-
-    // Microtonal detuned cluster (111Hz, 114.5Hz, 157Hz)
     const freqs = [111, 114.5, 157];
     freqs.forEach((freq) => {
       if (!this.ctx || !this.ambientGain) return;
       const osc = this.ctx.createOscillator();
       const gain = this.ctx.createGain();
-
       osc.type = 'sawtooth';
       osc.frequency.setValueAtTime(freq, now);
-
       gain.gain.setValueAtTime(0.001, now);
       gain.gain.linearRampToValueAtTime(0.025, now + 1.5);
-
       osc.connect(gain);
       gain.connect(this.ambientGain);
-
       osc.start(now);
       this.activeNodes.push(osc);
     });
   }
 
   // TURN VIII: RETURN ("THE RETURN")
-  // Endless Shepherd-Risset tone / golden spiral loop cycling octaves smoothly
   private createTurn8Return(now: number) {
     if (!this.ctx || !this.ambientGain) return;
-
     const octaveFreqs = [75, 150, 300, 600];
     octaveFreqs.forEach((baseFreq) => {
       if (!this.ctx || !this.ambientGain) return;
       const osc = this.ctx.createOscillator();
       const gain = this.ctx.createGain();
-
       osc.type = 'sine';
       osc.frequency.setValueAtTime(baseFreq, now);
 
-      // Slow logarithmic pitch rise LFO
       const lfo = this.ctx.createOscillator();
       lfo.frequency.setValueAtTime(0.05, now); // 20 second cycle
       const lfoGain = this.ctx.createGain();
       lfoGain.gain.setValueAtTime(15, now);
-
       lfo.connect(lfoGain);
       lfoGain.connect(osc.frequency);
 
       gain.gain.setValueAtTime(0.02, now);
-
       osc.connect(gain);
       gain.connect(this.ambientGain);
-
       osc.start(now);
       lfo.start(now);
-
       this.activeNodes.push(osc);
       this.activeLfos.push(lfo);
     });
   }
 
   // TURN IX: PERSPECTIVE / DOOR ("THE DOOR BETWEEN LAYERS")
-  // Stereo panned dual detuned triangle sweeps with binaural 4Hz theta wave gap
   private createTurn9Perspective(now: number) {
     if (!this.ctx || !this.ambientGain) return;
-
-    // Dual nodes for left/right binaural beat gap (180Hz vs 184Hz)
     const oscL = this.ctx.createOscillator();
     const oscR = this.ctx.createOscillator();
     const gainL = this.ctx.createGain();
@@ -838,14 +759,12 @@ class SoundEngine {
 
     oscL.type = 'triangle';
     oscL.frequency.setValueAtTime(180, now);
-
     oscR.type = 'triangle';
     oscR.frequency.setValueAtTime(184, now); // 4Hz binaural theta gap
 
     gainL.gain.setValueAtTime(0.03, now);
     gainR.gain.setValueAtTime(0.03, now);
 
-    // Stereo panners if supported
     if ('createStereoPanner' in this.ctx) {
       const pannerL = this.ctx.createStereoPanner();
       const pannerR = this.ctx.createStereoPanner();
@@ -868,31 +787,24 @@ class SoundEngine {
 
     oscL.start(now);
     oscR.start(now);
-
     this.activeNodes.push(oscL, oscR);
   }
 
   // TURN X: CENTER / RETURN TO CENTER ("THE RETURN TO CENTER")
-  // Celestial 432Hz Solfeggio golden harmonic bowl drone (108, 216, 432, 528, 639, 852Hz)
   private createTurn10Center(now: number) {
     if (!this.ctx || !this.ambientGain) return;
-
     const solfeggio = [108, 216, 432, 528, 639, 852];
     solfeggio.forEach((freq, idx) => {
       if (!this.ctx || !this.ambientGain) return;
       const osc = this.ctx.createOscillator();
       const gain = this.ctx.createGain();
-
       osc.type = 'sine';
       osc.frequency.setValueAtTime(freq, now);
-
       const targetGain = 0.05 / (idx > 2 ? idx * 0.8 : 1);
       gain.gain.setValueAtTime(0.001, now);
       gain.gain.linearRampToValueAtTime(targetGain, now + 2.5);
-
       osc.connect(gain);
       gain.connect(this.ambientGain);
-
       osc.start(now);
       this.activeNodes.push(osc);
     });
@@ -902,7 +814,6 @@ class SoundEngine {
   public stopAmbientDrone() {
     if (!this.ctx) return;
     const now = this.ctx.currentTime;
-
     this.activeNodes.forEach(node => {
       try {
         node.stop(now + 0.3);
@@ -910,7 +821,6 @@ class SoundEngine {
         // Ignore if already stopped
       }
     });
-
     this.activeLfos.forEach(lfo => {
       try {
         lfo.stop(now + 0.3);
@@ -918,7 +828,6 @@ class SoundEngine {
         // Ignore
       }
     });
-
     this.activeNodes = [];
     this.activeLfos = [];
     this.currentTurnId = 0;

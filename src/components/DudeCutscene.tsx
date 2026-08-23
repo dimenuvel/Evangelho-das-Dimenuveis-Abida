@@ -106,7 +106,7 @@ export const DudeCutscene: React.FC<DudeCutsceneProps> = ({ cutscene, onComplete
             )}
             {isStranger && (
               <div className="text-center">
-                <span className="text-4xl filter contrast-125">🤠</span>
+                <span className="text-4xl filter contrast-125 select-none animate-pulse">🌀</span>
                 <span
                   className={`block text-[9px] font-cinzel mt-1 uppercase font-bold tracking-widest ${
                     isDay ? 'text-[#b8860b]' : 'text-[#d4af37]'

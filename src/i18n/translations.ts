@@ -15,6 +15,20 @@ export interface TranslationSchema {
   endlessTitle: string;
   endlessSubtitle: string;
   tenTurnsBtn: string;
+  dailyChallenge: string;
+  dailyChallengeSubtitle: string;
+  dailyModifier: string;
+  dailyBonusScore: string;
+  dailyCompleted: string;
+  dailyReady: string;
+  dailyStreak: string;
+  nextChallengeIn: string;
+  playDaily: string;
+  replayDaily: string;
+  dailyChallengeVictory: string;
+  dailyBonusAwarded: string;
+  daysStreak: string;
+  todayChallenge: string;
   wave: string;
   waveCleared: string;
   dimensionShift: string;
@@ -40,6 +54,11 @@ export interface TranslationSchema {
   newHighScore: string;
   close: string;
   tenTurnsTitle: string;
+  tenTurnsHeaderSubtitle: string;
+  continueCampaign: string;
+  turnStatusCompleted: string;
+  turnStatusLocked: string;
+  allTurnsCleared: string;
   layerLabel: string;
   turnLabel: string;
   rugAbides: string;
@@ -189,9 +208,9 @@ export interface TranslationSchema {
 
 export const translations: Record<Language, TranslationSchema> = {
   en: {
-    appTitle: "ABIDE",
+    appTitle: "ABIDE - THE GAME",
     appSubtitle: "THE TEN TURNS",
-    subHeader: "EVANGELHO DAS DIMENÚVEIS",
+    subHeader: "GOSPEL OF DIMENUOUS",
     tagline: "\"Recognition is the game.\"",
     dudeQuote: "\"Just let it roll, man. The Rug abides.\"",
 
@@ -201,12 +220,26 @@ export const translations: Record<Language, TranslationSchema> = {
     endlessTitle: "INFINITE MODE",
     endlessSubtitle: "Endless waves & random dimensions",
     tenTurnsBtn: "10 TURNS",
+    dailyChallenge: "DAILY CHALLENGE",
+    dailyChallengeSubtitle: "SACRED DAILY CONFIGURATION",
+    dailyModifier: "DAILY BLESSING",
+    dailyBonusScore: "DAILY BONUS",
+    dailyCompleted: "COMPLETED",
+    dailyReady: "READY TO PLAY",
+    dailyStreak: "STREAK",
+    nextChallengeIn: "Next challenge in",
+    playDaily: "PLAY DAILY",
+    replayDaily: "REPLAY DAILY",
+    dailyChallengeVictory: "DAILY CHALLENGE CLEARED!",
+    dailyBonusAwarded: "+2,500 DAILY BONUS POINTS!",
+    daysStreak: "Days",
+    todayChallenge: "TODAY'S CHALLENGE",
     wave: "WAVE",
     waveCleared: "WAVE CLEARED!",
     dimensionShift: "DIMENSION SHIFT",
     meditate: "MEDITATE",
     soundLab: "SOUND LAB",
-    theGospel: "THE GOSPEL",
+    theGospel: "GOSPEL",
     backToHome: "BACK TO HOME",
     bestScore: "BEST SCORE",
     topScores: "TOP 10 SCORES",
@@ -226,6 +259,11 @@ export const translations: Record<Language, TranslationSchema> = {
     newHighScore: "NEW HIGH SCORE!",
     close: "CLOSE",
     tenTurnsTitle: "THE TEN TURNS OF THE SPIRAL",
+    tenTurnsHeaderSubtitle: "MAIN CAMPAIGN • CHOOSE YOUR SACRED TURN",
+    continueCampaign: "CONTINUE CAMPAIGN",
+    turnStatusCompleted: "COMPLETED",
+    turnStatusLocked: "LOCKED",
+    allTurnsCleared: "ALL 10 TURNS CLEARED",
     layerLabel: "DIMENUOUS",
     turnLabel: "TURN",
     rugAbides: "\"The Rug abides\"",
@@ -267,9 +305,9 @@ export const translations: Record<Language, TranslationSchema> = {
     voidDip: "Void Illusion Dip",
     returnToGame: "RETURN TO GAME",
 
-    gospelTitle: "GOSPEL OF THE DIMENUOUS",
+    gospelTitle: "GOSPEL OF DIMENUOUS",
     gospelCoreQuote: "\"Do not destroy the Dimenuous. Recognize it. Cross it. Return to the center.\"",
-    gospelIntro: "The Gospel of the Dimenuous reveals that existence unfolds in ten spiraling turns across distinct dimenuous of consciousness.",
+    gospelIntro: "Gospel of Dimenuous reveals that existence unfolds in ten spiraling turns across distinct dimenuous of consciousness.",
     sevenLayersTitle: "THE TEN DIMENUOUS OF THE SPIRAL",
     sacredSymbolsTitle: "SACRED SYMBOLS",
     symbolRugTitle: "The Rug",
@@ -361,11 +399,11 @@ export const translations: Record<Language, TranslationSchema> = {
     tourStep6Mechanic: "Explore Infinite Mode for endless score attacks, use the Meditate chamber for breathing exercises, or enter the Sound Lab to synthesize pure 432Hz & 528Hz healing tones."
   },
   pt: {
-    appTitle: "ABIDA",
+    appTitle: "ABIDA - O JOGO",
     appSubtitle: "OS DEZ GIROS",
     subHeader: "EVANGELHO DAS DIMENÚVEIS",
     tagline: "\"Reconhecimento é o jogo.\"",
-    dudeQuote: "\"Apenas deixe rolar, cara. O Tapete abida.\"",
+    dudeQuote: "\"Apenas deixe rolar, mano. O Tapete abida.\"",
 
     playTurn: "JOGAR GIRO",
     selectTurn: "SELECIONAR DOS DEZ GIROS",
@@ -373,6 +411,20 @@ export const translations: Record<Language, TranslationSchema> = {
     endlessTitle: "MODO INFINITO",
     endlessSubtitle: "Ondas sem fim e dimensões aleatórias",
     tenTurnsBtn: "10 GIROS",
+    dailyChallenge: "DESAFIO DIÁRIO",
+    dailyChallengeSubtitle: "CONFIGURAÇÃO SAGRADA DIÁRIA",
+    dailyModifier: "BÊNÇÃO DIÁRIA",
+    dailyBonusScore: "BÔNUS DIÁRIO",
+    dailyCompleted: "CONCLUÍDO",
+    dailyReady: "DISPONÍVEL",
+    dailyStreak: "SEQUÊNCIA",
+    nextChallengeIn: "Próximo desafio em",
+    playDaily: "JOGAR DIÁRIO",
+    replayDaily: "REJOGAR DIÁRIO",
+    dailyChallengeVictory: "DESAFIO DIÁRIO CONCLUÍDO!",
+    dailyBonusAwarded: "+2.500 PONTOS DE BÔNUS DIÁRIO!",
+    daysStreak: "Dias",
+    todayChallenge: "DESAFIO DE HOJE",
     wave: "ONDA",
     waveCleared: "ONDA CONCLUÍDA!",
     dimensionShift: "TRANSIÇÃO DIMENSIONAL",
@@ -398,6 +450,11 @@ export const translations: Record<Language, TranslationSchema> = {
     newHighScore: "NOVA PONTUAÇÃO RECORDE!",
     close: "FECHAR",
     tenTurnsTitle: "OS DEZ GIROS DA ESPIRAL",
+    tenTurnsHeaderSubtitle: "JORNADA PRINCIPAL • ESCOLHA SEU GIRO SAGRADO",
+    continueCampaign: "CONTINUAR JORNADA",
+    turnStatusCompleted: "CONCLUÍDO",
+    turnStatusLocked: "BLOQUEADO",
+    allTurnsCleared: "TODOS OS 10 GIROS CONCLUÍDOS",
     layerLabel: "DIMENÚVEIS",
     turnLabel: "GIRO",
     rugAbides: "\"O Tapete abida\"",

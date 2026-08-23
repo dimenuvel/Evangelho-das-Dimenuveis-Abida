@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback, useMemo } from 'react';
-import { GameStats, Cutscene, GameMode, TurnConfig, TurnId } from './types/game';
+import { GameStats, Cutscene, GameMode, TurnConfig, TurnId, DailyChallengeConfig } from './types/game';
 import { soundEngine } from './audio/soundEngine';
 import { MainMenu } from './components/MainMenu';
 import { CanvasGame } from './components/CanvasGame';
@@ -15,6 +15,8 @@ import { TopScoresModal } from './components/TopScoresModal';
 import { TourModal } from './components/TourModal';
 import { useLanguage } from './context/LanguageContext';
 import { useTheme } from './context/ThemeContext';
+import { getDailyChallengeConfig, saveDailyChallengeCompletion } from './utils/dailyChallenge';
+import { getTopLeaderboardScore } from './utils/leaderboard';
 
 type GameState = 'MENU' | 'CUTSCENE' | 'PLAYING' | 'TURN_X_ENDING' | 'GAME_OVER';
 type ModalState = 'NONE' | 'MEDITATE' | 'SOUND_LAB' | 'GOSPEL_LORE' | 'TOP_SCORES' | 'TOUR';
@@ -39,14 +41,21 @@ export default function App() {
 
   // Game Stats & Storage
   const [stats, setStats] = useState<GameStats>(() => {
+    const topScore = getTopLeaderboardScore();
     try {
       const saved = localStorage.getItem(LOCAL_STORAGE_KEY);
-      if (saved) return JSON.parse(saved);
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        return {
+          ...parsed,
+          highScore: topScore
+        };
+      }
     } catch {
       // Fallback
     }
     return {
-      highScore: 0,
+      highScore: topScore,
       unlockedTurn: 1,
       turnsCompleted: [],
       totalAbideSeconds: 0,
@@ -64,6 +73,14 @@ export default function App() {
     }
   }, [stats]);
 
+  // Handle Leaderboard Reset
+  const handleResetLeaderboard = useCallback(() => {
+    setStats(prev => ({
+      ...prev,
+      highScore: 0
+    }));
+  }, []);
+
   // Primary App States
   const [gameState, setGameState] = useState<GameState>('MENU');
   const [modalState, setModalState] = useState<ModalState>('NONE');
@@ -71,6 +88,11 @@ export default function App() {
   const [currentTurnId, setCurrentTurnId] = useState<number>(1);
   const [wave, setWave] = useState<number>(1);
   const [highlightScoreId, setHighlightScoreId] = useState<string | undefined>(undefined);
+
+  // Daily Challenge State
+  const [dailyConfig, setDailyConfig] = useState<DailyChallengeConfig>(() => getDailyChallengeConfig());
+  const [isDailyWin, setIsDailyWin] = useState<boolean>(false);
+  const [dailyBonusAwarded, setDailyBonusAwarded] = useState<number>(0);
 
   // Auto-open Tour on first run if not seen yet
   useEffect(() => {
@@ -123,6 +145,8 @@ export default function App() {
     setAbideMeter(20);
     setIsAbideMode(false);
     setIsPaused(false);
+    setIsDailyWin(false);
+    setDailyBonusAwarded(0);
     if (isFreshStart) {
       setScore(0);
     }
@@ -146,7 +170,32 @@ export default function App() {
     setAbideMeter(20);
     setIsAbideMode(false);
     setIsPaused(false);
+    setIsDailyWin(false);
+    setDailyBonusAwarded(0);
     setGameState('PLAYING');
+  }, []);
+
+  // Handle Start Daily Challenge
+  const handleStartDaily = useCallback(() => {
+    const conf = getDailyChallengeConfig();
+    setDailyConfig(conf);
+    setGameMode('DAILY');
+    setScore(0);
+    setLives(3);
+    setAbideMeter(conf.modifier === 'GOLDEN_ZEN' ? 50 : 20);
+    setIsAbideMode(false);
+    setIsPaused(false);
+    setIsDailyWin(false);
+    setDailyBonusAwarded(0);
+    setGameState('PLAYING');
+  }, []);
+
+  // Handle Daily Challenge Win
+  const handleDailyChallengeComplete = useCallback((finalScore: number, bonusScore: number) => {
+    saveDailyChallengeCompletion(finalScore, bonusScore);
+    setIsDailyWin(true);
+    setDailyBonusAwarded(bonusScore);
+    setGameState('GAME_OVER');
   }, []);
 
   // Cutscene Finished
@@ -233,7 +282,28 @@ export default function App() {
     };
   }, [wave, language]);
 
-  const activeTurnConfig = gameMode === 'ENDLESS' ? endlessTurnConfig : (turnsConfig[currentTurnId] || turnsConfig[1]);
+  // Dynamic Daily Config
+  const dailyTurnConfig: TurnConfig = useMemo(() => {
+    return {
+      id: 777 as TurnId,
+      title: language === 'pt' ? dailyConfig.titlePt : dailyConfig.titleEn,
+      subtitle: language === 'pt' ? dailyConfig.subtitlePt : dailyConfig.subtitleEn,
+      layer: language === 'pt' ? 'DESAFIO DIÁRIO' : 'DAILY CHALLENGE',
+      description: language === 'pt' ? dailyConfig.descriptionPt : dailyConfig.descriptionEn,
+      themeColor: dailyConfig.themeColor,
+      accentColor: dailyConfig.accentColor,
+      ballSpeed: dailyConfig.ballSpeed,
+      bgSymbol: dailyConfig.bgSymbol,
+      quote: language === 'pt' ? dailyConfig.modifierDescPt : dailyConfig.modifierDescEn
+    };
+  }, [dailyConfig, language]);
+
+  const activeTurnConfig =
+    gameMode === 'DAILY'
+      ? dailyTurnConfig
+      : gameMode === 'ENDLESS'
+      ? endlessTurnConfig
+      : turnsConfig[currentTurnId] || turnsConfig[1];
 
   return (
     <div
@@ -247,6 +317,7 @@ export default function App() {
           stats={stats}
           onSelectTurn={(turnId) => handleSelectTurn(turnId, true)}
           onStartEndless={handleStartEndless}
+          onStartDaily={handleStartDaily}
           onOpenMeditate={() => setModalState('MEDITATE')}
           onOpenSoundLab={() => setModalState('SOUND_LAB')}
           onOpenGospelLore={() => setModalState('GOSPEL_LORE')}
@@ -295,6 +366,7 @@ export default function App() {
               score={score}
               abideMeter={abideMeter}
               gameMode={gameMode}
+              dailyConfig={dailyConfig}
               wave={wave}
               onWaveChange={setWave}
               onScoreUpdate={handleScoreUpdate}
@@ -302,6 +374,7 @@ export default function App() {
               onAbideUpdate={handleAbideUpdate}
               onTurnComplete={handleTurnComplete}
               onTurnXComplete={handleTurnXComplete}
+              onDailyChallengeComplete={handleDailyChallengeComplete}
               onGameOver={handleGameOver}
               isPaused={isPaused}
               isAbideMode={isAbideMode}
@@ -316,7 +389,9 @@ export default function App() {
               onResume={() => setIsPaused(false)}
               onRestartTurn={() => {
                 setIsPaused(false);
-                if (gameMode === 'ENDLESS') {
+                if (gameMode === 'DAILY') {
+                  handleStartDaily();
+                } else if (gameMode === 'ENDLESS') {
                   handleStartEndless();
                 } else {
                   handleSelectTurn(currentTurnId, true);
@@ -346,10 +421,14 @@ export default function App() {
       {gameState === 'GAME_OVER' && (
         <GameOverModal
           score={score}
-          turnId={gameMode === 'ENDLESS' ? 999 : currentTurnId}
+          turnId={gameMode === 'DAILY' ? 777 : gameMode === 'ENDLESS' ? 999 : currentTurnId}
           gameMode={gameMode}
+          isDailyWin={isDailyWin}
+          bonusAwarded={dailyBonusAwarded}
           onTryAgain={() => {
-            if (gameMode === 'ENDLESS') {
+            if (gameMode === 'DAILY') {
+              handleStartDaily();
+            } else if (gameMode === 'ENDLESS') {
               handleStartEndless();
             } else {
               handleSelectTurn(currentTurnId, true);
@@ -371,9 +450,11 @@ export default function App() {
         <TopScoresModal
           highlightId={highlightScoreId}
           onClose={() => setModalState('NONE')}
+          onResetLeaderboard={handleResetLeaderboard}
         />
       )}
       {modalState === 'TOUR' && <TourModal onClose={() => setModalState('NONE')} />}
     </div>
   );
 }
+

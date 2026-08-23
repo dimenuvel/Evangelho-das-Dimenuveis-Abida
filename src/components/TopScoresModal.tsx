@@ -8,11 +8,13 @@ import { useTheme } from '../context/ThemeContext';
 interface TopScoresModalProps {
   onClose: () => void;
   highlightId?: string;
+  onResetLeaderboard?: () => void;
 }
 
 export const TopScoresModal: React.FC<TopScoresModalProps> = ({
   onClose,
-  highlightId
+  highlightId,
+  onResetLeaderboard
 }) => {
   const { t, language } = useLanguage();
   const { isDay } = useTheme();
@@ -38,6 +40,7 @@ export const TopScoresModal: React.FC<TopScoresModalProps> = ({
     const emptyList = resetLeaderboard();
     setScores(emptyList);
     setIsConfirmingReset(false);
+    onResetLeaderboard?.();
   };
 
   const getRankBadge = (rank: number) => {

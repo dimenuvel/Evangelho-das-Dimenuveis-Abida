@@ -81,10 +81,23 @@ export function saveLeaderboardScore(
   return { entries: top10, rank };
 }
 
+export function getTopLeaderboardScore(): number {
+  const current = getLeaderboard();
+  return current.length > 0 ? current[0].score : 0;
+}
+
 export function resetLeaderboard(): LeaderboardEntry[] {
   try {
     localStorage.removeItem(LEADERBOARD_KEY);
     localStorage.removeItem(LEGACY_LEADERBOARD_KEY);
+    
+    // Also reset highScore in app stats if present
+    const statsRaw = localStorage.getItem('abide_ten_turns_stats_v1');
+    if (statsRaw) {
+      const stats = JSON.parse(statsRaw);
+      stats.highScore = 0;
+      localStorage.setItem('abide_ten_turns_stats_v1', JSON.stringify(stats));
+    }
   } catch {
     // Ignore
   }

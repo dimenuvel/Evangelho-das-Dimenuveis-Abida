@@ -1,5 +1,5 @@
 import React, { useRef, useEffect, useState, useCallback } from 'react';
-import { TurnConfig, Block, Particle, PowerUp, FloatingText, ElementType } from '../types/game';
+import { TurnConfig, Block, Particle, PowerUp, FloatingText, ElementType, DailyChallengeConfig } from '../types/game';
 import { soundEngine } from '../audio/soundEngine';
 import { useTheme } from '../context/ThemeContext';
 import { useLanguage } from '../context/LanguageContext';
@@ -9,7 +9,8 @@ interface CanvasGameProps {
   lives: number;
   score: number;
   abideMeter: number;
-  gameMode?: 'TURNS' | 'ENDLESS';
+  gameMode?: 'TURNS' | 'ENDLESS' | 'DAILY';
+  dailyConfig?: DailyChallengeConfig;
   wave?: number;
   onWaveChange?: (newWave: number) => void;
   onScoreUpdate: (newScore: number) => void;
@@ -17,6 +18,7 @@ interface CanvasGameProps {
   onAbideUpdate: (newAbide: number | ((prev: number) => number)) => void;
   onTurnComplete: () => void;
   onTurnXComplete: () => void;
+  onDailyChallengeComplete?: (finalScore: number, bonusScore: number) => void;
   onGameOver: () => void;
   isPaused: boolean;
   isAbideMode: boolean;
@@ -33,6 +35,7 @@ export const CanvasGame: React.FC<CanvasGameProps> = ({
   lives,
   score,
   gameMode = 'TURNS',
+  dailyConfig,
   wave = 1,
   onWaveChange,
   onScoreUpdate,
@@ -40,6 +43,7 @@ export const CanvasGame: React.FC<CanvasGameProps> = ({
   onAbideUpdate,
   onTurnComplete,
   onTurnXComplete,
+  onDailyChallengeComplete,
   onGameOver,
   isPaused,
   isAbideMode,
@@ -51,13 +55,13 @@ export const CanvasGame: React.FC<CanvasGameProps> = ({
 
   // Gameplay state refs
   const paddleRef = useRef({
-    x: GAME_WIDTH / 2 - 45,
+    x: GAME_WIDTH / 2 - (dailyConfig?.modifier === 'AETHER_FLOW' ? 55 : 45),
     y: GAME_HEIGHT - 36,
-    width: 90,
+    width: dailyConfig?.modifier === 'AETHER_FLOW' ? 110 : 90,
     height: 14,
-    targetX: GAME_WIDTH / 2 - 45,
+    targetX: GAME_WIDTH / 2 - (dailyConfig?.modifier === 'AETHER_FLOW' ? 55 : 45),
     speed: 0,
-    lastX: GAME_WIDTH / 2 - 45
+    lastX: GAME_WIDTH / 2 - (dailyConfig?.modifier === 'AETHER_FLOW' ? 55 : 45)
   });
 
   const ballRef = useRef({
@@ -75,6 +79,30 @@ export const CanvasGame: React.FC<CanvasGameProps> = ({
   const particlesRef = useRef<Particle[]>([]);
   const powerUpsRef = useRef<PowerUp[]>([]);
   const floatingTextsRef = useRef<FloatingText[]>([]);
+  const shockwavesRef = useRef<
+    Array<{
+      id: string;
+      x: number;
+      y: number;
+      radius: number;
+      maxRadius: number;
+      speed: number;
+      color: string;
+      lineWidth: number;
+      alpha: number;
+      isBeam?: boolean;
+      beamY?: number;
+    }>
+  >([]);
+
+  // Screen-shake state
+  const screenShakeRef = useRef<{ intensity: number; decay: number }>({
+    intensity: 0,
+    decay: 0.88
+  });
+
+  // Track cleared layers/rows within current turn/wave
+  const clearedLayersRef = useRef<Set<number>>(new Set());
 
   // States & powerups
   const ieouaIndexRef = useRef<number>(0);
@@ -118,6 +146,12 @@ export const CanvasGame: React.FC<CanvasGameProps> = ({
     }
   }, [vibrationEnabled]);
 
+  // Trigger screen-shake animation
+  const triggerScreenShake = useCallback((intensity = 6) => {
+    screenShakeRef.current.intensity = Math.max(screenShakeRef.current.intensity, intensity);
+    triggerHaptic(Math.min(60, Math.round(intensity * 7)));
+  }, [triggerHaptic]);
+
   const stateRef = useRef({
     score,
     lives,
@@ -126,6 +160,7 @@ export const CanvasGame: React.FC<CanvasGameProps> = ({
     turnConfig,
     language,
     gameMode,
+    dailyConfig,
     wave,
     onWaveChange,
     onScoreUpdate,
@@ -133,6 +168,7 @@ export const CanvasGame: React.FC<CanvasGameProps> = ({
     onAbideUpdate,
     onTurnComplete,
     onTurnXComplete,
+    onDailyChallengeComplete,
     onGameOver,
     triggerHaptic
   });
@@ -146,6 +182,7 @@ export const CanvasGame: React.FC<CanvasGameProps> = ({
       turnConfig,
       language,
       gameMode,
+      dailyConfig,
       wave,
       onWaveChange,
       onScoreUpdate,
@@ -153,6 +190,7 @@ export const CanvasGame: React.FC<CanvasGameProps> = ({
       onAbideUpdate,
       onTurnComplete,
       onTurnXComplete,
+      onDailyChallengeComplete,
       onGameOver,
       triggerHaptic
     };
@@ -171,6 +209,68 @@ export const CanvasGame: React.FC<CanvasGameProps> = ({
       vy: -1.2
     });
   };
+
+  // Trigger sacred layer crossing celebration effect
+  const triggerLayerCrossed = useCallback((layerIndex: number, layerY: number) => {
+    // 1. Screen shake animation
+    triggerScreenShake(7.5);
+
+    // 2. Harmonious audio feedback
+    soundEngine.playIEOUAVowel('A', 5);
+
+    // 3. Radiant horizontal shockwave beam across the layer plane
+    shockwavesRef.current.push({
+      id: Math.random().toString(),
+      x: GAME_WIDTH / 2,
+      y: layerY,
+      radius: 8,
+      maxRadius: GAME_WIDTH,
+      speed: 11,
+      color: '#fbbf24',
+      lineWidth: 3.5,
+      alpha: 1.0,
+      isBeam: true,
+      beamY: layerY
+    });
+
+    // Expanding concentric shockwave ring
+    shockwavesRef.current.push({
+      id: Math.random().toString(),
+      x: GAME_WIDTH / 2,
+      y: layerY,
+      radius: 10,
+      maxRadius: 180,
+      speed: 7,
+      color: '#38bdf8',
+      lineWidth: 2,
+      alpha: 0.85
+    });
+
+    // 4. Burst of sacred particles & twinkling stars along the layer row
+    for (let i = 0; i < 28; i++) {
+      const px = (GAME_WIDTH / 28) * i + (Math.random() - 0.5) * 16;
+      const py = layerY + (Math.random() - 0.5) * 10;
+      particlesRef.current.push({
+        x: px,
+        y: py,
+        vx: (Math.random() - 0.5) * 5,
+        vy: (Math.random() - 0.5) * 4 - 1.2,
+        size: Math.random() * 4.5 + 2,
+        color: ['#fbbf24', '#f59e0b', '#38bdf8', '#ffffff', '#a855f7', '#34d399'][Math.floor(Math.random() * 6)],
+        alpha: 1.0,
+        decay: 0.02,
+        shape: Math.random() < 0.45 ? 'star' : 'circle'
+      });
+    }
+
+    // 5. Floating text announcement
+    const text = stateRef.current.language === 'pt' ? '⚡ CAMADA ATRAVESSADA! +250' : '⚡ LAYER CROSSED! +250';
+    addFloatingText(text, GAME_WIDTH / 2 - 100, Math.max(45, layerY - 16), '#fbbf24', 18);
+
+    // 6. Bonus score & Abide gauge
+    stateRef.current.onScoreUpdate(stateRef.current.score + 250);
+    stateRef.current.onAbideUpdate(prev => Math.min(100, prev + 15));
+  }, [triggerScreenShake]);
 
   // Build Endless Wave Blocks
   const generateEndlessWaveBlocks = useCallback((waveNum: number, themeColor: string, accentColor: string): Block[] => {
@@ -211,7 +311,8 @@ export const CanvasGame: React.FC<CanvasGameProps> = ({
             hitsTaken: 0,
             color: isArmored ? '#ea580c' : themeColor,
             glowColor: accentColor,
-            visible: true
+            visible: true,
+            layerIndex: r
           });
         }
       }
@@ -284,7 +385,8 @@ export const CanvasGame: React.FC<CanvasGameProps> = ({
             visible,
             originalX: bx,
             originalY: by,
-            dx: (c % 2 === 0 ? 1 : -1) * 0.8
+            dx: (c % 2 === 0 ? 1 : -1) * 0.8,
+            layerIndex: r
           });
         }
       }
@@ -327,8 +429,315 @@ export const CanvasGame: React.FC<CanvasGameProps> = ({
     return blocks;
   }, []);
 
+  // Build Deterministic Daily Challenge Blocks
+  const generateDailyChallengeBlocks = useCallback((config: DailyChallengeConfig): Block[] => {
+    const blocks: Block[] = [];
+    const themeColor = config.themeColor;
+    const accentColor = config.accentColor;
+    const formation = config.brickFormation;
+    const modifier = config.modifier;
+    let idCounter = 0;
+
+    const blockWidth = 56;
+    const blockHeight = 16;
+    const startX = (GAME_WIDTH - (7 * (blockWidth + 6) - 6)) / 2;
+    const startY = 44;
+
+    if (formation === 'MANDALA') {
+      const centerX = GAME_WIDTH / 2;
+      const centerY = 135;
+      const radius1 = 46;
+      const count1 = 8;
+      for (let i = 0; i < count1; i++) {
+        const angle = (i / count1) * Math.PI * 2;
+        const bx = centerX + Math.cos(angle) * radius1 - blockWidth / 2;
+        const by = centerY + Math.sin(angle) * radius1 - blockHeight / 2;
+        blocks.push({
+          id: `daily_m1_${idCounter++}`,
+          x: bx,
+          y: by,
+          width: blockWidth,
+          height: blockHeight,
+          type: modifier === 'HARMONIC_VOWELS' ? 'energy' : 'normal',
+          hitsRequired: 1,
+          hitsTaken: 0,
+          color: themeColor,
+          glowColor: accentColor,
+          visible: true,
+          layerIndex: 1
+        });
+      }
+
+      const radius2 = 82;
+      const count2 = 12;
+      for (let i = 0; i < count2; i++) {
+        const angle = (i / count2) * Math.PI * 2;
+        const bx = centerX + Math.cos(angle) * radius2 - blockWidth / 2;
+        const by = centerY + Math.sin(angle) * radius2 - blockHeight / 2;
+        const isArmored = i % 3 === 0;
+        blocks.push({
+          id: `daily_m2_${idCounter++}`,
+          x: bx,
+          y: by,
+          width: blockWidth,
+          height: blockHeight,
+          type: isArmored ? 'armored' : modifier === 'SOLAR_SURGE' ? 'element' : 'normal',
+          elementType: isArmored ? undefined : 'FIRE',
+          hitsRequired: isArmored ? 2 : 1,
+          hitsTaken: 0,
+          color: isArmored ? '#ea580c' : themeColor,
+          glowColor: accentColor,
+          visible: true,
+          layerIndex: 2
+        });
+      }
+
+      // Sacred center pins
+      const pinPositions = [
+        { x: centerX, y: centerY - 12 },
+        { x: centerX - 12, y: centerY + 10 },
+        { x: centerX + 12, y: centerY + 10 }
+      ];
+      pinPositions.forEach((pos, idx) => {
+        blocks.push({
+          id: `daily_pin_${idx}`,
+          x: pos.x - 8,
+          y: pos.y - 11,
+          width: 16,
+          height: 22,
+          type: 'pin',
+          hitsRequired: 1,
+          hitsTaken: 0,
+          color: '#ffffff',
+          glowColor: 'rgba(251, 191, 36, 0.9)',
+          visible: true,
+          isPin: true
+        });
+      });
+    } else if (formation === 'PYRAMID') {
+      for (let r = 0; r < 5; r++) {
+        const countInRow = r * 2 + 1;
+        const clampedCount = Math.min(7, countInRow);
+        const rowStartX = (GAME_WIDTH - (clampedCount * (blockWidth + 6) - 6)) / 2;
+        for (let c = 0; c < clampedCount; c++) {
+          const bx = rowStartX + c * (blockWidth + 6);
+          const by = startY + r * (blockHeight + 6);
+          const isCapstone = r === 0;
+          const isArmored = r === 1 || r === 3;
+          blocks.push({
+            id: `daily_pyr_${r}_${c}`,
+            x: bx,
+            y: by,
+            width: blockWidth,
+            height: blockHeight,
+            type: isCapstone ? 'energy' : isArmored ? 'armored' : 'normal',
+            hitsRequired: isCapstone ? 2 : isArmored ? 2 : 1,
+            hitsTaken: 0,
+            color: isCapstone ? '#fbbf24' : isArmored ? '#ea580c' : themeColor,
+            glowColor: accentColor,
+            visible: true,
+            layerIndex: r
+          });
+        }
+      }
+      const pinX = GAME_WIDTH / 2;
+      const pinY = startY - 14;
+      [-18, 0, 18].forEach((offset, idx) => {
+        blocks.push({
+          id: `daily_pyr_pin_${idx}`,
+          x: pinX + offset - 8,
+          y: pinY - 11,
+          width: 16,
+          height: 22,
+          type: 'pin',
+          hitsRequired: 1,
+          hitsTaken: 0,
+          color: '#ffffff',
+          glowColor: 'rgba(251, 191, 36, 0.9)',
+          visible: true,
+          isPin: true
+        });
+      });
+    } else if (formation === 'TEMPLE') {
+      for (let c = 1; c < 6; c++) {
+        blocks.push({
+          id: `daily_temple_arch_${c}`,
+          x: startX + c * (blockWidth + 6),
+          y: startY,
+          width: blockWidth,
+          height: blockHeight,
+          type: 'armored',
+          hitsRequired: 2,
+          hitsTaken: 0,
+          color: '#ea580c',
+          glowColor: accentColor,
+          visible: true,
+          layerIndex: 0
+        });
+      }
+      for (let r = 1; r < 5; r++) {
+        blocks.push({
+          id: `daily_temple_lp_${r}`,
+          x: startX + 1 * (blockWidth + 6),
+          y: startY + r * (blockHeight + 6),
+          width: blockWidth,
+          height: blockHeight,
+          type: 'normal',
+          hitsRequired: 1,
+          hitsTaken: 0,
+          color: themeColor,
+          glowColor: accentColor,
+          visible: true,
+          layerIndex: r
+        });
+        blocks.push({
+          id: `daily_temple_rp_${r}`,
+          x: startX + 5 * (blockWidth + 6),
+          y: startY + r * (blockHeight + 6),
+          width: blockWidth,
+          height: blockHeight,
+          type: 'normal',
+          hitsRequired: 1,
+          hitsTaken: 0,
+          color: themeColor,
+          glowColor: accentColor,
+          visible: true,
+          layerIndex: r
+        });
+      }
+      for (let c = 2; c <= 4; c++) {
+        blocks.push({
+          id: `daily_temple_altar_${c}`,
+          x: startX + c * (blockWidth + 6),
+          y: startY + 2 * (blockHeight + 6),
+          width: blockWidth,
+          height: blockHeight,
+          type: modifier === 'VOID_MYSTERY' ? 'void_illusion' : 'energy',
+          hitsRequired: 1,
+          hitsTaken: 0,
+          color: modifier === 'VOID_MYSTERY' ? '#a855f7' : '#10b981',
+          glowColor: accentColor,
+          visible: true,
+          layerIndex: 2
+        });
+      }
+      const pinX = GAME_WIDTH / 2;
+      const pinY = startY + 4 * (blockHeight + 6) + 4;
+      [
+        { x: pinX, y: pinY },
+        { x: pinX - 14, y: pinY - 14 },
+        { x: pinX + 14, y: pinY - 14 }
+      ].forEach((pos, idx) => {
+        blocks.push({
+          id: `daily_temple_pin_${idx}`,
+          x: pos.x - 8,
+          y: pos.y - 11,
+          width: 16,
+          height: 22,
+          type: 'pin',
+          hitsRequired: 1,
+          hitsTaken: 0,
+          color: '#ffffff',
+          glowColor: 'rgba(251, 191, 36, 0.9)',
+          visible: true,
+          isPin: true
+        });
+      });
+    } else if (formation === 'VORTEX') {
+      const centerX = GAME_WIDTH / 2;
+      const centerY = 130;
+      const totalVortex = 18;
+      for (let i = 0; i < totalVortex; i++) {
+        const radius = 24 + i * 4.8;
+        const angle = i * 0.55;
+        const bx = centerX + Math.cos(angle) * radius - blockWidth / 2;
+        const by = centerY + Math.sin(angle) * radius - blockHeight / 2;
+        const isElement = i % 4 === 0;
+        blocks.push({
+          id: `daily_vortex_${i}`,
+          x: bx,
+          y: by,
+          width: blockWidth,
+          height: blockHeight,
+          type: isElement ? 'element' : 'normal',
+          elementType: isElement ? (['FIRE', 'AIR', 'WATER', 'EARTH'] as ElementType[])[i % 4] : undefined,
+          hitsRequired: 1,
+          hitsTaken: 0,
+          color: isElement ? '#38bdf8' : themeColor,
+          glowColor: accentColor,
+          visible: true,
+          originalX: bx,
+          originalY: by,
+          dx: Math.sin(i) * 0.6,
+          layerIndex: Math.floor(i / 5)
+        });
+      }
+    } else {
+      // COSMIC_CROSS
+      for (let r = 0; r < 5; r++) {
+        for (let c = 0; c < 7; c++) {
+          const isHorizontalBar = r === 2;
+          const isVerticalBar = c === 3;
+          const isCorner = (r === 0 || r === 4) && (c === 1 || c === 5);
+
+          if (isHorizontalBar || isVerticalBar || isCorner) {
+            const bx = startX + c * (blockWidth + 6);
+            const by = startY + r * (blockHeight + 6);
+            const isCenter = r === 2 && c === 3;
+            blocks.push({
+              id: `daily_cross_${r}_${c}`,
+              x: bx,
+              y: by,
+              width: blockWidth,
+              height: blockHeight,
+              type: isCenter ? 'armored' : isCorner ? 'element' : 'normal',
+              elementType: isCorner ? (['FIRE', 'AIR', 'WATER', 'EARTH'] as ElementType[])[(r + c) % 4] : undefined,
+              hitsRequired: isCenter ? 3 : 1,
+              hitsTaken: 0,
+              color: isCenter ? '#ea580c' : isCorner ? '#38bdf8' : themeColor,
+              glowColor: accentColor,
+              visible: true,
+              layerIndex: r
+            });
+          }
+        }
+      }
+    }
+
+    if (modifier === 'PIN_CASCADE') {
+      const pinX = GAME_WIDTH / 2;
+      const pinY = 36;
+      [-28, -14, 14, 28].forEach((offset, idx) => {
+        blocks.push({
+          id: `daily_cascade_pin_${idx}`,
+          x: pinX + offset - 8,
+          y: pinY - 11,
+          width: 16,
+          height: 22,
+          type: 'pin',
+          hitsRequired: 1,
+          hitsTaken: 0,
+          color: '#ffffff',
+          glowColor: 'rgba(251, 191, 36, 0.9)',
+          visible: true,
+          isPin: true
+        });
+      });
+    }
+
+    return blocks;
+  }, []);
+
   // Build Blocks for Turn
   const initTurnBlocks = useCallback(() => {
+    clearedLayersRef.current = new Set();
+    shockwavesRef.current = [];
+
+    if (gameMode === 'DAILY' && dailyConfig) {
+      blocksRef.current = generateDailyChallengeBlocks(dailyConfig);
+      return;
+    }
+
     if (gameMode === 'ENDLESS') {
       blocksRef.current = generateEndlessWaveBlocks(wave, turnConfig.themeColor, turnConfig.accentColor);
       return;
@@ -369,7 +778,8 @@ export const CanvasGame: React.FC<CanvasGameProps> = ({
             hitsTaken: 0,
             color: '#fbbf24',
             glowColor: 'rgba(251, 191, 36, 0.6)',
-            visible: true
+            visible: true,
+            layerIndex: r
           });
         }
       }
@@ -430,7 +840,8 @@ export const CanvasGame: React.FC<CanvasGameProps> = ({
           visible,
           originalX: bx,
           originalY: by,
-          dx: (c % 2 === 0 ? 1 : -1) * 0.8
+          dx: (c % 2 === 0 ? 1 : -1) * 0.8,
+          layerIndex: r
         });
       }
     }
@@ -755,18 +1166,30 @@ export const CanvasGame: React.FC<CanvasGameProps> = ({
                 block.visible = false;
                 stateRef.current.onScoreUpdate(stateRef.current.score + 100);
 
-                // Spawn particles
-                for (let i = 0; i < 8; i++) {
+                // Spawn block shatter particles
+                for (let i = 0; i < 10; i++) {
                   particlesRef.current.push({
                     x: block.x + block.width / 2,
                     y: block.y + block.height / 2,
-                    vx: (Math.random() - 0.5) * 5,
-                    vy: (Math.random() - 0.5) * 5,
+                    vx: (Math.random() - 0.5) * 6,
+                    vy: (Math.random() - 0.5) * 6,
                     size: Math.random() * 4 + 2,
                     color: block.glowColor,
                     alpha: 1.0,
-                    decay: 0.03
+                    decay: 0.03,
+                    shape: Math.random() < 0.3 ? 'star' : 'circle'
                   });
+                }
+
+                // Check if an entire horizontal Layer/Row was crossed!
+                if (block.layerIndex !== undefined && !clearedLayersRef.current.has(block.layerIndex)) {
+                  const remainingInLayer = blocks.filter(
+                    b => !b.isPin && b.layerIndex === block.layerIndex && b.visible
+                  ).length;
+                  if (remainingInLayer === 0) {
+                    clearedLayersRef.current.add(block.layerIndex);
+                    triggerLayerCrossed(block.layerIndex, block.y + block.height / 2);
+                  }
                 }
 
                 // Elemental PowerUp drop check
@@ -794,6 +1217,7 @@ export const CanvasGame: React.FC<CanvasGameProps> = ({
                     // IEOUA Sequence Completed!
                     ieouaIndexRef.current = 0;
                     setIeouaDisplay([]);
+                    triggerScreenShake(7.5);
                     addFloatingText(
                       stateRef.current.language === 'pt' ? '✨ HARMONIA I E O U A' : '✨ I E O U A HARMONY',
                       GAME_WIDTH / 2 - 90,
@@ -827,19 +1251,74 @@ export const CanvasGame: React.FC<CanvasGameProps> = ({
           });
 
           // Check Strike bonus if all pins cleared
-          if ((stateRef.current.gameMode === 'ENDLESS' || [2, 4, 6, 8].includes(stateRef.current.turnConfig.id)) && activePinsCount === 0 && blocks.some(bl => bl.isPin)) {
+          if ((stateRef.current.gameMode === 'ENDLESS' || stateRef.current.gameMode === 'DAILY' || [2, 4, 6, 8].includes(stateRef.current.turnConfig.id)) && activePinsCount === 0 && blocks.some(bl => bl.isPin)) {
+            triggerScreenShake(6);
             addFloatingText(stateRef.current.language === 'pt' ? 'ABIDA — STRIKE PERFEITO' : 'ABIDE — PERFECT STRIKE', GAME_WIDTH / 2 - 90, 180, '#fbbf24', 22);
             stateRef.current.onScoreUpdate(stateRef.current.score + 1000);
             stateRef.current.onAbideUpdate(prev => Math.min(100, prev + 30));
           }
 
-          // Check Turn Completion / Endless Wave Progression
+          // Check Turn Completion / Endless Wave Progression / Daily Challenge Win
           if (remainingNormalBlocks === 0) {
-            if (stateRef.current.gameMode === 'ENDLESS') {
+            if (stateRef.current.gameMode === 'DAILY') {
+              const bonus = stateRef.current.dailyConfig?.bonusScore || 2500;
+              triggerScreenShake(10);
+              soundEngine.playIEOUASequenceComplete();
+              soundEngine.playAbideActivation();
+
+              const finalScore = stateRef.current.score + bonus;
+              stateRef.current.onScoreUpdate(finalScore);
+              stateRef.current.onAbideUpdate(prev => Math.min(100, prev + 50));
+
+              addFloatingText(
+                stateRef.current.language === 'pt' ? `DESAFIO DIÁRIO CONCLUÍDO! +${bonus}` : `DAILY CHALLENGE CLEARED! +${bonus}`,
+                GAME_WIDTH / 2 - 120,
+                160,
+                '#fbbf24',
+                22
+              );
+
+              // Spawn massive celebration fireworks & shockwaves
+              shockwavesRef.current.push({
+                id: Math.random().toString(),
+                x: GAME_WIDTH / 2,
+                y: 130,
+                radius: 12,
+                maxRadius: 280,
+                speed: 8,
+                color: '#fbbf24',
+                lineWidth: 4,
+                alpha: 1.0
+              });
+
+              for (let i = 0; i < 36; i++) {
+                particlesRef.current.push({
+                  x: GAME_WIDTH / 2 + (Math.random() - 0.5) * 240,
+                  y: 130 + (Math.random() - 0.5) * 120,
+                  vx: (Math.random() - 0.5) * 10,
+                  vy: (Math.random() - 0.5) * 10,
+                  size: Math.random() * 6 + 3,
+                  color: ['#fbbf24', '#f59e0b', '#38bdf8', '#a855f7', '#10b981', '#ffffff'][Math.floor(Math.random() * 6)],
+                  alpha: 1.0,
+                  decay: 0.015,
+                  shape: Math.random() < 0.4 ? 'star' : 'circle'
+                });
+              }
+
+              // Freeze ball and finish after brief celebration
+              b.stuck = true;
+              b.vx = 0;
+              b.vy = 0;
+
+              setTimeout(() => {
+                stateRef.current.onDailyChallengeComplete?.(finalScore, bonus);
+              }, 1200);
+            } else if (stateRef.current.gameMode === 'ENDLESS') {
               const currentWave = stateRef.current.wave || 1;
               const nextWave = currentWave + 1;
               const waveBonus = 1000 + nextWave * 250;
               
+              triggerScreenShake(8.5);
               soundEngine.playIEOUASequenceComplete();
               soundEngine.playAbideActivation();
               
@@ -854,17 +1333,30 @@ export const CanvasGame: React.FC<CanvasGameProps> = ({
                 22
               );
               
-              // Spawn wave clear celebration fireworks
-              for (let i = 0; i < 24; i++) {
+              // Shockwave & celebration fireworks
+              shockwavesRef.current.push({
+                id: Math.random().toString(),
+                x: GAME_WIDTH / 2,
+                y: 120,
+                radius: 10,
+                maxRadius: 240,
+                speed: 8,
+                color: '#38bdf8',
+                lineWidth: 3.5,
+                alpha: 1.0
+              });
+
+              for (let i = 0; i < 28; i++) {
                 particlesRef.current.push({
                   x: GAME_WIDTH / 2 + (Math.random() - 0.5) * 200,
                   y: 120 + (Math.random() - 0.5) * 100,
                   vx: (Math.random() - 0.5) * 8,
                   vy: (Math.random() - 0.5) * 8,
                   size: Math.random() * 5 + 3,
-                  color: ['#fbbf24', '#38bdf8', '#a855f7', '#10b981', '#f43f5e'][Math.floor(Math.random() * 5)],
+                  color: ['#fbbf24', '#38bdf8', '#a855f7', '#10b981', '#f43f5e', '#ffffff'][Math.floor(Math.random() * 6)],
                   alpha: 1.0,
-                  decay: 0.02
+                  decay: 0.02,
+                  shape: Math.random() < 0.4 ? 'star' : 'circle'
                 });
               }
 
@@ -875,6 +1367,44 @@ export const CanvasGame: React.FC<CanvasGameProps> = ({
                 stateRef.current.turnConfig.accentColor
               );
             } else if (stateRef.current.turnConfig.id !== 10) {
+              triggerScreenShake(9);
+              soundEngine.playIEOUASequenceComplete();
+              soundEngine.playAbideActivation();
+
+              shockwavesRef.current.push({
+                id: Math.random().toString(),
+                x: GAME_WIDTH / 2,
+                y: 130,
+                radius: 10,
+                maxRadius: 260,
+                speed: 8.5,
+                color: '#fbbf24',
+                lineWidth: 4,
+                alpha: 1.0
+              });
+
+              for (let i = 0; i < 32; i++) {
+                particlesRef.current.push({
+                  x: GAME_WIDTH / 2 + (Math.random() - 0.5) * 220,
+                  y: 120 + (Math.random() - 0.5) * 110,
+                  vx: (Math.random() - 0.5) * 9,
+                  vy: (Math.random() - 0.5) * 9,
+                  size: Math.random() * 5 + 3,
+                  color: ['#fbbf24', '#f59e0b', '#38bdf8', '#a855f7', '#10b981', '#ffffff'][Math.floor(Math.random() * 6)],
+                  alpha: 1.0,
+                  decay: 0.018,
+                  shape: Math.random() < 0.4 ? 'star' : 'circle'
+                });
+              }
+
+              addFloatingText(
+                stateRef.current.language === 'pt' ? '✨ GIRO CONCLUÍDO!' : '✨ TURN CLEARED!',
+                GAME_WIDTH / 2 - 80,
+                150,
+                '#fbbf24',
+                22
+              );
+
               stateRef.current.onTurnComplete();
             }
           }
@@ -893,6 +1423,34 @@ export const CanvasGame: React.FC<CanvasGameProps> = ({
               b.x = center.x;
               b.y = center.y;
               soundEngine.playAbideActivation();
+              triggerScreenShake(12);
+
+              shockwavesRef.current.push({
+                id: Math.random().toString(),
+                x: center.x,
+                y: center.y,
+                radius: 10,
+                maxRadius: 280,
+                speed: 9,
+                color: '#fbbf24',
+                lineWidth: 4,
+                alpha: 1.0
+              });
+
+              for (let i = 0; i < 40; i++) {
+                particlesRef.current.push({
+                  x: center.x,
+                  y: center.y,
+                  vx: (Math.random() - 0.5) * 12,
+                  vy: (Math.random() - 0.5) * 12,
+                  size: Math.random() * 6 + 3,
+                  color: ['#fbbf24', '#f59e0b', '#ffffff', '#38bdf8', '#a855f7'][Math.floor(Math.random() * 5)],
+                  alpha: 1.0,
+                  decay: 0.015,
+                  shape: Math.random() < 0.5 ? 'star' : 'circle'
+                });
+              }
+
               stateRef.current.onTurnXComplete();
             }
           }
@@ -936,10 +1494,22 @@ export const CanvasGame: React.FC<CanvasGameProps> = ({
           }
         });
 
+        // --- UPDATE SHOCKWAVES --- //
+        shockwavesRef.current.forEach((sw, idx) => {
+          sw.radius += sw.speed;
+          sw.alpha -= 0.025;
+          if (sw.alpha <= 0 || sw.radius >= sw.maxRadius) {
+            shockwavesRef.current.splice(idx, 1);
+          }
+        });
+
         // --- UPDATE PARTICLES --- //
         particlesRef.current.forEach((part, idx) => {
           part.x += part.vx;
           part.y += part.vy;
+          if (part.rotation !== undefined && part.vRot !== undefined) {
+            part.rotation += part.vRot;
+          }
           part.alpha -= part.decay;
           if (part.alpha <= 0) particlesRef.current.splice(idx, 1);
         });
@@ -954,9 +1524,27 @@ export const CanvasGame: React.FC<CanvasGameProps> = ({
 
       // --- 2. RENDER CANVAS SCENE --- //
 
+      // Calculate and apply Screen Shake Offset
+      let shakeOffsetX = 0;
+      let shakeOffsetY = 0;
+      if (screenShakeRef.current.intensity > 0.1) {
+        const shake = screenShakeRef.current.intensity;
+        shakeOffsetX = (Math.random() - 0.5) * shake * 2;
+        shakeOffsetY = (Math.random() - 0.5) * shake * 2;
+        screenShakeRef.current.intensity *= screenShakeRef.current.decay;
+        if (screenShakeRef.current.intensity < 0.1) {
+          screenShakeRef.current.intensity = 0;
+        }
+      }
+
       // Background Clear
       ctx.fillStyle = stateRef.current.isDay ? '#f5efe6' : '#09080e'; // Warm serene linen or deep mystical obsidian
       ctx.fillRect(0, 0, GAME_WIDTH, GAME_HEIGHT);
+
+      ctx.save();
+      if (shakeOffsetX !== 0 || shakeOffsetY !== 0) {
+        ctx.translate(shakeOffsetX, shakeOffsetY);
+      }
 
       // Render Ambient Cosmic Stars & Sacred Geometry Grid
       ctx.strokeStyle = stateRef.current.isDay ? 'rgba(184, 134, 11, 0.08)' : 'rgba(255, 255, 255, 0.03)';
@@ -1029,6 +1617,40 @@ export const CanvasGame: React.FC<CanvasGameProps> = ({
         ctx.stroke();
         ctx.restore();
       }
+
+      // Render Shockwaves & Layer Beams
+      shockwavesRef.current.forEach(sw => {
+        ctx.save();
+        ctx.globalAlpha = Math.max(0, sw.alpha);
+        if (sw.isBeam && sw.beamY !== undefined) {
+          // Horizontal Sacred Layer Crossing Beam
+          const grad = ctx.createLinearGradient(0, sw.beamY - 14, 0, sw.beamY + 14);
+          grad.addColorStop(0, 'rgba(251, 191, 36, 0)');
+          grad.addColorStop(0.5, sw.color);
+          grad.addColorStop(1, 'rgba(251, 191, 36, 0)');
+          ctx.fillStyle = grad;
+          ctx.fillRect(0, sw.beamY - 10, GAME_WIDTH, 20);
+
+          ctx.strokeStyle = '#ffffff';
+          ctx.lineWidth = sw.lineWidth;
+          ctx.shadowColor = sw.color;
+          ctx.shadowBlur = 15;
+          ctx.beginPath();
+          ctx.moveTo(0, sw.beamY);
+          ctx.lineTo(GAME_WIDTH, sw.beamY);
+          ctx.stroke();
+        } else {
+          // Expanding circular shockwave ring
+          ctx.strokeStyle = sw.color;
+          ctx.lineWidth = sw.lineWidth;
+          ctx.shadowColor = sw.color;
+          ctx.shadowBlur = 12;
+          ctx.beginPath();
+          ctx.arc(sw.x, sw.y, sw.radius, 0, Math.PI * 2);
+          ctx.stroke();
+        }
+        ctx.restore();
+      });
 
       // Render Blocks & Bowling Pins
       blocksRef.current.forEach(block => {
@@ -1176,14 +1798,30 @@ export const CanvasGame: React.FC<CanvasGameProps> = ({
       ctx.stroke();
       ctx.restore();
 
-      // Render Particles
+      // Render Particles (Stars & Radiant Orbs)
       particlesRef.current.forEach(part => {
         ctx.save();
         ctx.fillStyle = part.color;
-        ctx.globalAlpha = part.alpha;
-        ctx.beginPath();
-        ctx.arc(part.x, part.y, part.size, 0, Math.PI * 2);
-        ctx.fill();
+        ctx.shadowColor = part.color;
+        ctx.shadowBlur = 8;
+        ctx.globalAlpha = Math.max(0, part.alpha);
+
+        if (part.shape === 'star') {
+          ctx.font = `bold ${Math.max(10, Math.round(part.size * 2))}px sans-serif`;
+          ctx.textAlign = 'center';
+          ctx.textBaseline = 'middle';
+          ctx.fillText('✦', part.x, part.y);
+        } else if (part.shape === 'ring') {
+          ctx.strokeStyle = part.color;
+          ctx.lineWidth = 1.5;
+          ctx.beginPath();
+          ctx.arc(part.x, part.y, part.size * 1.5, 0, Math.PI * 2);
+          ctx.stroke();
+        } else {
+          ctx.beginPath();
+          ctx.arc(part.x, part.y, part.size, 0, Math.PI * 2);
+          ctx.fill();
+        }
         ctx.restore();
       });
 
@@ -1191,12 +1829,16 @@ export const CanvasGame: React.FC<CanvasGameProps> = ({
       floatingTextsRef.current.forEach(ft => {
         ctx.save();
         ctx.fillStyle = ft.color;
-        ctx.globalAlpha = ft.alpha;
+        ctx.shadowColor = ft.color;
+        ctx.shadowBlur = 10;
+        ctx.globalAlpha = Math.max(0, ft.alpha);
         ctx.font = `bold ${ft.fontSize}px sans-serif`;
         ctx.textAlign = 'center';
         ctx.fillText(ft.text, ft.x, ft.y);
         ctx.restore();
       });
+
+      ctx.restore(); // Restore screen shake transformation
 
       animationFrameId = requestAnimationFrame(render);
     };

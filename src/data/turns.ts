@@ -159,7 +159,7 @@ export const TURNS_CONFIG_PT: Record<number, TurnConfig> = {
     accentColor: '#a7f3d0',
     ballSpeed: 5.6,
     bgSymbol: '⚡',
-    quote: 'Observe a mente. Apenas deixe rolar, cara.'
+    quote: 'Observe a mente. Apenas deixe rolar, mano.'
   },
   4: {
     id: 4,
@@ -271,7 +271,7 @@ export const CUTSCENES_EN: Record<number, Cutscene> = {
       { speaker: 'DISCIPLE', text: 'The blocks are pulsing and moving! Is reality breaking down?' },
       { speaker: 'THE DUDE', text: 'Nah. It’s just energy flowing through the Dimenuous. Everything moves, man.' },
       { speaker: 'DISCIPLE', text: 'Should I try to stop them?' },
-      { speaker: 'THE DUDE', text: 'Don’t fight the Spiral. Sip your White Russian and move with it.' }
+      { speaker: 'THE DUDE', text: 'Don’t fight the Spiral. Sip your coffee and move with it.' }
     ]
   },
   6: {
@@ -310,25 +310,25 @@ export const CUTSCENES_PT: Record<number, Cutscene> = {
       { speaker: 'DISCIPLE', text: 'Mestre... eu deveria controlar a bola?' },
       { speaker: 'THE DUDE', text: 'Não exatamente.' },
       { speaker: 'DISCIPLE', text: 'Então o que estou fazendo com este tapete?' },
-      { speaker: 'THE DUDE', text: 'Abidando, cara. Apenas pegando o que vem caindo.' },
+      { speaker: 'THE DUDE', text: 'Abidando, mano. Apenas pegando o que vem caindo.' },
       { speaker: 'DISCIPLE', text: '...enquanto jogo Breakout?' },
-      { speaker: 'THE DUDE', text: 'Pois é, cara. Alivia a tensão.' }
+      { speaker: 'THE DUDE', text: 'Pois é, mano. Alivia a tensão.' }
     ]
   },
   3: {
     turnId: 3,
     lines: [
       { speaker: 'DISCIPLE', text: 'Os blocos estão pulsando e se movendo! A realidade está desmoronando?' },
-      { speaker: 'THE DUDE', text: 'Que nada. É a energia fluindo pelas Dimenúveis. Tudo se move, cara.' },
+      { speaker: 'THE DUDE', text: 'Que nada. É a energia fluindo pelas Dimenúveis. Tudo se move, mano.' },
       { speaker: 'DISCIPLE', text: 'Eu deveria tentar pará-los?' },
-      { speaker: 'THE DUDE', text: 'Não lute contra a Espiral. Tome seu White Russian e mova-se com ela.' }
+      { speaker: 'THE DUDE', text: 'Não lute contra a Espiral. Tome seu café e mova-se com ela.' }
     ]
   },
   6: {
     turnId: 6,
     lines: [
       { speaker: 'DISCIPLE', text: 'Fogo, Ar, Água, Terra... qual elemento é mais poderoso?' },
-      { speaker: 'THE DUDE', text: 'A Água deixa o Tapete fluido e amplo. A Terra mantém o chão seguro. Mas o equilíbrio é a chave, cara.' },
+      { speaker: 'THE DUDE', text: 'A Água deixa o Tapete fluido e amplo. A Terra mantém o chão seguro. Mas o equilíbrio é a chave, mano.' },
       { speaker: 'THE STRANGER', text: 'Às vezes você come o bar, e às vezes, bem... o bar come você.' },
       { speaker: 'THE DUDE', text: 'Isso é profundo, Estranho. Quer uma partida de pino cósmico?' }
     ]

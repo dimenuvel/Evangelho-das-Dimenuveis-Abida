@@ -1,6 +1,6 @@
 export type TurnId = 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10;
 
-export type GameMode = 'TURNS' | 'ENDLESS';
+export type GameMode = 'TURNS' | 'ENDLESS' | 'DAILY';
 
 export type LayerName = 
   | 'SILENCE'
@@ -61,6 +61,7 @@ export interface Block {
   dx?: number;
   dy?: number;
   isPin?: boolean;
+  layerIndex?: number;
 }
 
 export interface Particle {
@@ -72,8 +73,10 @@ export interface Particle {
   color: string;
   alpha: number;
   decay: number;
-  shape?: 'circle' | 'star' | 'spiral' | 'vowel';
+  shape?: 'circle' | 'star' | 'spiral' | 'vowel' | 'spark' | 'ring';
   text?: string;
+  rotation?: number;
+  vRot?: number;
 }
 
 export interface PowerUp {
@@ -122,4 +125,46 @@ export interface LeaderboardEntry {
   score: number;
   turn: number;
   date: string;
+}
+
+export type DailyModifier =
+  | 'SOLAR_SURGE'
+  | 'HARMONIC_VOWELS'
+  | 'PIN_CASCADE'
+  | 'AETHER_FLOW'
+  | 'VOID_MYSTERY'
+  | 'GOLDEN_ZEN';
+
+export interface DailyChallengeConfig {
+  dateKey: string;
+  seed: number;
+  titleEn: string;
+  titlePt: string;
+  subtitleEn: string;
+  subtitlePt: string;
+  descriptionEn: string;
+  descriptionPt: string;
+  modifier: DailyModifier;
+  modifierNameEn: string;
+  modifierNamePt: string;
+  modifierDescEn: string;
+  modifierDescPt: string;
+  bonusScore: number;
+  themeColor: string;
+  accentColor: string;
+  ballSpeed: number;
+  bgSymbol: string;
+  brickFormation: 'MANDALA' | 'PYRAMID' | 'VORTEX' | 'TEMPLE' | 'COSMIC_CROSS';
+}
+
+export interface DailyChallengeRecord {
+  lastCompletedDateKey: string | null;
+  currentStreak: number;
+  maxStreak: number;
+  totalCompleted: number;
+  history: Record<string, {
+    completedAt: string;
+    score: number;
+    bonusAwarded: number;
+  }>;
 }

@@ -1,13 +1,16 @@
 import React, { useState, useEffect } from 'react';
-import { RotateCcw, Home, Trophy, Sparkles, Check } from 'lucide-react';
+import { RotateCcw, Home, Trophy, Sparkles, Check, Calendar, Flame, Clock } from 'lucide-react';
 import { useLanguage } from '../context/LanguageContext';
 import { useTheme } from '../context/ThemeContext';
 import { getLastPlayerName, isTopScore, saveLeaderboardScore } from '../utils/leaderboard';
+import { getTimeUntilNextDailyChallenge, getDailyChallengeRecord } from '../utils/dailyChallenge';
 
 interface GameOverModalProps {
   score: number;
   turnId: number;
-  gameMode?: 'TURNS' | 'ENDLESS';
+  gameMode?: 'TURNS' | 'ENDLESS' | 'DAILY';
+  isDailyWin?: boolean;
+  bonusAwarded?: number;
   onTryAgain: () => void;
   onReturnToMenu: () => void;
   onOpenTopScores: (savedId?: string) => void;
@@ -17,6 +20,8 @@ export const GameOverModal: React.FC<GameOverModalProps> = ({
   score,
   turnId,
   gameMode = 'TURNS',
+  isDailyWin = false,
+  bonusAwarded = 0,
   onTryAgain,
   onReturnToMenu,
   onOpenTopScores
@@ -28,6 +33,15 @@ export const GameOverModal: React.FC<GameOverModalProps> = ({
   const [isSaved, setIsSaved] = useState<boolean>(false);
   const [savedEntryId, setSavedEntryId] = useState<string | undefined>(undefined);
   const [isTopTen, setIsTopTen] = useState<boolean>(false);
+  const [countdown, setCountdown] = useState(() => getTimeUntilNextDailyChallenge().formatted);
+  const [dailyRecord, setDailyRecord] = useState(() => getDailyChallengeRecord());
+
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setCountdown(getTimeUntilNextDailyChallenge().formatted);
+    }, 1000);
+    return () => clearInterval(timer);
+  }, []);
 
   useEffect(() => {
     const lastName = getLastPlayerName();
@@ -37,6 +51,7 @@ export const GameOverModal: React.FC<GameOverModalProps> = ({
       setPlayerName(language === 'pt' ? 'Discípulo' : 'The Disciple');
     }
     setIsTopTen(isTopScore(score));
+    setDailyRecord(getDailyChallengeRecord());
   }, [score, language]);
 
   const handleSaveScore = (autoNavigateToTopScores: boolean = false) => {
@@ -46,7 +61,7 @@ export const GameOverModal: React.FC<GameOverModalProps> = ({
     }
 
     const trimmed = playerName.trim() || (language === 'pt' ? 'Discípulo' : 'The Disciple');
-    const result = saveLeaderboardScore(trimmed, score, turnId);
+    const result = saveLeaderboardScore(trimmed, score, gameMode === 'DAILY' ? 777 : turnId);
     const createdId = result.entries.find(e => e.score === Math.floor(score) && e.name === trimmed)?.id;
     
     setIsSaved(true);
@@ -84,13 +99,15 @@ export const GameOverModal: React.FC<GameOverModalProps> = ({
             : 'bg-[#120c08] border-[#d4af37]/40 text-[#d4af37] shadow-[0_0_50px_rgba(212,175,55,0.35)]'
         }`}
       >
-        {/* Sacred Bowling Ball Icon */}
+        {/* Sacred Bowling Ball or Daily Icon */}
         <div
           className={`w-12 h-12 rounded-full border flex items-center justify-center shadow-inner ${
             isDay ? 'border-[#b8860b] bg-[#ede4d4]' : 'border-[#d4af37] bg-[#1a140f]'
           }`}
         >
-          <span className="text-2xl filter contrast-125 select-none">🎳</span>
+          <span className="text-2xl filter contrast-125 select-none">
+            {gameMode === 'DAILY' ? (isDailyWin ? '⚡' : '✨') : '🎳'}
+          </span>
         </div>
 
         <div>
@@ -99,12 +116,32 @@ export const GameOverModal: React.FC<GameOverModalProps> = ({
               isDay ? 'text-[#2c2017]' : 'text-[#d4af37]'
             }`}
           >
-            {t.gameOverTitle}
+            {gameMode === 'DAILY'
+              ? (isDailyWin ? t.dailyChallengeVictory : t.dailyChallenge)
+              : t.gameOverTitle}
           </h2>
           <p className={`text-[11px] font-serif italic mt-1 leading-relaxed ${isDay ? 'text-[#634e3f]' : 'text-[#f5deb3]/80'}`}>
-            {t.gameOverQuote}
+            {gameMode === 'DAILY'
+              ? (isDailyWin
+                  ? (language === 'pt' ? 'O alinhamento cósmico diário foi completado com maestria!' : 'Today’s sacred alignment was completed with mastery!')
+                  : (language === 'pt' ? 'A Espiral convida a tentar novamente hoje.' : 'The Spiral invites another attempt today.'))
+              : t.gameOverQuote}
           </p>
         </div>
+
+        {/* Daily Bonus Awarded Banner if Daily Challenge Win */}
+        {gameMode === 'DAILY' && bonusAwarded > 0 && (
+          <div
+            className={`w-full py-2 px-3 rounded-xl border flex items-center justify-center space-x-2 text-xs font-cinzel font-bold uppercase tracking-wider animate-pulse ${
+              isDay
+                ? 'bg-[#b8860b]/15 text-[#8c6508] border-[#b8860b]/40 shadow-[0_0_12px_rgba(184,134,11,0.2)]'
+                : 'bg-[#d4af37]/20 text-[#fef08a] border-[#d4af37]/50 shadow-[0_0_15px_rgba(212,175,55,0.3)]'
+            }`}
+          >
+            <Sparkles className="w-4 h-4 text-[#d4af37]" />
+            <span>+{bonusAwarded.toLocaleString()} {t.dailyBonusScore}</span>
+          </div>
+        )}
 
         {/* Score & Turn Summary Banner */}
         <div
@@ -123,13 +160,43 @@ export const GameOverModal: React.FC<GameOverModalProps> = ({
           <div className="h-6 w-px bg-inherit/30" />
           <div className="flex flex-col items-center">
             <span className="text-[9px] uppercase tracking-widest opacity-60">
-              {gameMode === 'ENDLESS' ? t.endlessBtn : t.turnLabel}
+              {gameMode === 'ENDLESS' ? t.endlessBtn : gameMode === 'DAILY' ? t.dailyStreak : t.turnLabel}
             </span>
-            <span className="font-bold text-sm">
-              {gameMode === 'ENDLESS' || turnId === 999 ? '∞' : turnId >= 10 ? 'X' : turnId}
+            <span className="font-bold text-sm flex items-center space-x-1">
+              {gameMode === 'DAILY' ? (
+                <>
+                  <Flame className="w-3.5 h-3.5 text-amber-500 fill-amber-500 inline" />
+                  <span>{dailyRecord.currentStreak} {t.daysStreak}</span>
+                </>
+              ) : gameMode === 'ENDLESS' || turnId === 999 ? (
+                '∞'
+              ) : turnId >= 10 ? (
+                'X'
+              ) : (
+                turnId
+              )}
             </span>
           </div>
         </div>
+
+        {/* Daily Countdown Box when in Daily Mode */}
+        {gameMode === 'DAILY' && (
+          <div
+            className={`w-full py-1.5 px-3 rounded-lg border text-[10px] font-mono flex items-center justify-between ${
+              isDay
+                ? 'bg-[#f5ede0] border-[#b8860b]/20 text-[#634e3f]'
+                : 'bg-[#18110c] border-[#d4af37]/20 text-[#d4af37]/80'
+            }`}
+          >
+            <span className="flex items-center space-x-1 font-serif uppercase tracking-wider text-[9px]">
+              <Clock className="w-3 h-3 text-[#d4af37]" />
+              <span>{t.nextChallengeIn}:</span>
+            </span>
+            <span className="font-bold text-xs text-[#b8860b] dark:text-[#fef08a]">
+              {countdown}
+            </span>
+          </div>
+        )}
 
         {/* Top 10 Celebration Badge */}
         {isTopTen && (
@@ -194,19 +261,25 @@ export const GameOverModal: React.FC<GameOverModalProps> = ({
         <div className="w-full space-y-2 pt-1">
           <button
             onClick={handleTryAgainClick}
-            className={`w-full py-3 font-cinzel font-bold text-xs tracking-[0.25em] uppercase rounded-xl hover:opacity-95 active:scale-[0.98] transition-all flex items-center justify-center space-x-2 shadow-lg ${
+            className={`w-full py-3 font-cinzel font-bold text-xs tracking-[0.25em] uppercase rounded-xl hover:opacity-95 active:scale-[0.98] transition-all flex items-center justify-center space-x-2 shadow-lg cursor-pointer ${
               isDay
                 ? 'bg-gradient-to-r from-[#b8860b] via-[#e5c158] to-[#b8860b] text-[#1f160e] shadow-[0_0_15px_rgba(184,134,11,0.3)]'
                 : 'bg-gradient-to-r from-[#d4af37] via-[#f5deb3] to-[#d4af37] text-[#0d0907] shadow-[0_0_15px_rgba(212,175,55,0.4)]'
             }`}
           >
             <RotateCcw className="w-4 h-4" />
-            <span>{gameMode === 'ENDLESS' ? t.tryAgain : `${t.tryAgain} ${turnId}`}</span>
+            <span>
+              {gameMode === 'DAILY'
+                ? t.replayDaily
+                : gameMode === 'ENDLESS'
+                ? t.tryAgain
+                : `${t.tryAgain} ${turnId}`}
+            </span>
           </button>
 
           <button
             onClick={() => onOpenTopScores(savedEntryId)}
-            className={`w-full py-2.5 border font-cinzel font-semibold text-xs tracking-[0.2em] uppercase rounded-xl transition-all flex items-center justify-center space-x-2 ${
+            className={`w-full py-2.5 border font-cinzel font-semibold text-xs tracking-[0.2em] uppercase rounded-xl transition-all flex items-center justify-center space-x-2 cursor-pointer ${
               isDay
                 ? 'bg-[#ede4d4] border-[#b8860b]/30 text-[#2c2017] hover:bg-[#b8860b]/15'
                 : 'bg-[#1a140f] border-[#d4af37]/30 text-[#d4af37] hover:bg-[#d4af37]/10'
@@ -218,7 +291,7 @@ export const GameOverModal: React.FC<GameOverModalProps> = ({
 
           <button
             onClick={handleReturnToMenuClick}
-            className={`w-full py-2 border font-serif font-semibold text-xs tracking-[0.2em] uppercase rounded-xl transition-all flex items-center justify-center space-x-2 opacity-80 hover:opacity-100 ${
+            className={`w-full py-2 border font-serif font-semibold text-xs tracking-[0.2em] uppercase rounded-xl transition-all flex items-center justify-center space-x-2 opacity-80 hover:opacity-100 cursor-pointer ${
               isDay
                 ? 'border-[#b8860b]/20 text-[#634e3f] hover:bg-[#b8860b]/10'
                 : 'border-[#d4af37]/20 text-[#d4af37]/70 hover:bg-[#d4af37]/10'

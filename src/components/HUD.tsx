@@ -13,7 +13,7 @@ interface HUDProps {
   isAbideMode: boolean;
   isMuted: boolean;
   isPaused: boolean;
-  gameMode?: 'TURNS' | 'ENDLESS';
+  gameMode?: 'TURNS' | 'ENDLESS' | 'DAILY';
   wave?: number;
   vibrationEnabled?: boolean;
   onToggleMute: () => void;
@@ -58,6 +58,11 @@ export const HUD: React.FC<HUDProps> = ({
               <>
                 <span className="font-bold text-xs">∞</span>
                 <span>{t.endlessTitle} • {t.wave} {wave}</span>
+              </>
+            ) : gameMode === 'DAILY' ? (
+              <>
+                <span className="font-bold text-xs">⚡</span>
+                <span className="text-[#b8860b] dark:text-[#fef08a]">{t.dailyChallenge}</span>
               </>
             ) : (
               <span>{turnConfig.subtitle} — {t.layerLabel} {turnConfig.layer}</span>
