@@ -97,8 +97,8 @@ jobs:
         run: |
           cd android
           ./gradlew assembleRelease --no-daemon --stacktrace
-
-      # Step 13: Organize and Zip Output APK
+          
+      # Step 13: Organize APK Artifact
       - name: Organize APK Artifact
         run: |
           mkdir -p build-output
@@ -109,23 +109,21 @@ jobs:
           else
             echo "No APK found!" && exit 1
           fi
-          cd build-output
-          zip Abida-O-Jogo.zip Abida-O-Jogo.apk
 
-      # Step 14: Upload Zipped APK
+      # Step 14: Upload APK Artifact
       - name: Upload APK Artifact
         uses: actions/upload-artifact@v4
         with:
           name: Abida-O-Jogo
-          path: build-output/Abida-O-Jogo.zip
+          path: build-output/Abida-O-Jogo.apk
           retention-days: 14
 
-      # Step 15: Attach Zipped APK to GitHub Release if a tag was pushed
+      # Step 15: Attach APK to GitHub Release if a tag was pushed
       - name: Release to GitHub Releases
         if: startsWith(github.ref, 'refs/tags/v')
         uses: softprops/action-gh-release@v2
         with:
-          files: build-output/Abida-O-Jogo.zip
+          files: build-output/Abida-O-Jogo.apk
           draft: false
           prerelease: false
           generate_release_notes: true
