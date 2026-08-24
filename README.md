@@ -1,4 +1,4 @@
-# Abida - O Jogo 🎳✨ `v1.2`
+# Abida - O Jogo - Evangelho das Dimenúveis
 
 https://github.com/dimenuvel/Evangelho-das-Dimenuveis-Abida/releases/tag/v1.2
 
@@ -71,7 +71,7 @@ https://github.com/dimenuvel/Evangelho-das-Dimenuveis-Abida/releases/tag/v1.2
 1. **Clone o repositório**:
    ```bash
    git clone https://github.com/your-username/abide-the-game.git
-   cd abide-the-game
+   cd abida-o-jogo
    ```
 
 2. **Instale as dependências**:
