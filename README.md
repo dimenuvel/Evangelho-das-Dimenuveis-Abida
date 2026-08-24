@@ -70,8 +70,8 @@ https://github.com/dimenuvel/Evangelho-das-Dimenuveis-Abida/releases/tag/v1.2
 
 1. **Clone o repositório**:
    ```bash
-   git clone https://github.com/your-username/abide-the-game.git
-   cd abida-o-jogo
+   git clone https://github.com/dimenuvel/Evangelho-das-Dimenuveis-Abida.git
+   cd Evangelho-das-Dimenuveis-Abida 
    ```
 
 2. **Instale as dependências**:
